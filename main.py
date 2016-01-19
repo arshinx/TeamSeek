@@ -5,6 +5,7 @@ import json
 import os
 
 from src import api
+from src import db
 
 # Default port number
 PORT = 8080
@@ -20,6 +21,7 @@ if 'CHERRYPY_PORT' in os.environ:
 thisDir = os.path.dirname(os.path.realpath(__file__))
 staticDir = os.path.join(thisDir, 'public')
 
+db = db.PostgreSQL()
 
 class Router(object):
     """ Main router object for Teamseek """
