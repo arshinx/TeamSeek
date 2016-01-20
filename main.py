@@ -6,6 +6,7 @@ import os
 
 from src import api
 from src import db
+from src import skills
 
 # Default port number
 PORT = 8080
@@ -31,6 +32,10 @@ class Router(object):
     }
     # mount the targets from api.WebRoutes at /api/
     api = api.WebRoutes()
+
+    # mount the targets from skills.Fetch at /skills/
+    # pass database connection to Fetch() object
+    skills = skills.Fetch(db.connection)
 
 
 """ Start application """
