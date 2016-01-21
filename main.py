@@ -20,7 +20,7 @@ def pagePath(pageName):
 
 def readPage(pageName):
     """ Read data from template pages """
-    with open(pagePath('welcome')) as f:
+    with open(pagePath(pageName)) as f:
         return f.read()
 
 
