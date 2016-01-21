@@ -43,11 +43,13 @@ class Fetch(object):
         # Excute the SQL query to get 5 skills
         # started with the entered 'q' string
         # with the most frequently used
-        query = "SELECT skill " + \
-                "FROM nv_test " + \
-                "WHERE skill LIKE %s " + \
-                "ORDER BY used_count DESC " + \
-                "LIMIT 5;"
+        query = """
+            SELECT skill
+            FROM nv_test
+            WHERE skill LIKE %s
+            ORDER BY used_count DESC
+            LIMIT 5;
+        """
         cur.execute(query, (q + "%",))          # Prevent SQL injection
         # Fetch the result returned by database
         skills = cur.fetchall()
