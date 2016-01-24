@@ -12,6 +12,8 @@ Resolve all non mapped url targets
 (essentially just "/" or "/<username>/")
 """
 
+NO_CACHE = 'NO_CACHE' in os.environ
+
 def pagePath(pageName):
     """ Return the path for template pages """
     return os.path.join('views', pageName + '.html')
@@ -37,6 +39,8 @@ class Page:
     def fresh(self):
         """ Return True if cached data is fresh """
         # TODO add logic to detect if file has changed
+        if NO_CACHE:
+            return False
         return True
 
 class PageCache:
