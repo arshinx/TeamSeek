@@ -1,0 +1,173 @@
+@import url("https://fonts.googleapis.com/css?family=Lato:300,400,700");
+@import url("https://fonts.googleapis.com/css?family=Comfortaa:300,400,700");
+
+[v-cloak] { display: none }
+
+html {
+  font-family: sans-serif;
+  font-family:  "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background-color: #f5f5f5;
+}
+
+.projectbox {
+  display: block;
+  color: black;
+  padding-bottom: 30px;
+}
+
+.projectbox h1, h2 {
+  font-weight: lighter;
+}
+
+.displayitem {
+  background-color: white;
+  display:  block;
+  margin: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.04);
+  padding: 10px 40px 10px 40px;
+  padding-top: 5px;
+}
+
+
+.displayitem .footer {
+  position: relative;
+  top: 32px;
+  margin-left: -20px;
+}
+
+.displayitem .footer > a {
+  margin-right: 20px;
+}
+/* unvisited link */
+.displayitem .footer > a:link {
+  color: grey;
+}
+
+/* visited link */
+.displayitem .footer > a:visited {
+  color: grey;
+}
+
+/* mouse over link */
+.displayitem .footer > a:hover {
+  transition: .3s;   
+  color: green;
+}
+
+/* selected link */
+.displayitem .footer > a:active {
+  color: grey;
+}
+
+.projectbox > img {
+  margin-right: 20px;
+}
+
+.bigitem {
+   /* This will be twice as big as the small item. */
+  align-self: flex-start;
+  flex: 2 0 0; 
+  /* leave room for footer text */
+  margin-bottom: 60px;
+}
+
+.smallitem {
+  flex: 1 0 0;
+  align-self: flex-start;
+}
+
+.bigitem, .smallitem {
+  margin-top: 20px;
+}
+
+.sl-page {
+  display: flex;
+  flex-flow: column;
+  padding:0px;
+  height: 100%;
+  color: black;
+}
+
+.sl-page .sl-item {
+  flex: 0 1 30px;
+  padding: 0px;
+}
+
+.sl-page .sl-item.header {
+  flex: 0 1 auto;
+  font-size: large;
+  background-color: #1D90FF;
+  margin: 0px;
+  color: white;
+  padding: .5em;
+  font-size: 30px;
+}
+
+.centerbox {
+  max-width: 1140px;
+  min-width: 1020px;
+  position: relative;
+  margin: auto;
+}
+
+.align-to-displayitem {
+  padding: 0px 0px 0px 40px;
+}
+
+.flexcenter {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: row /* works with row or column */
+  flex-direction: row;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+
+.sl-page .sl-item.body {
+  flex: 1 1 auto;
+  background-color: #EEEEEE;
+  margin-left: 0px;
+  margin-right: 0px;
+  /*color: black;*/
+}
+
+.sl-page .sl-item.footer {
+  flex: 0 1 40px;
+}
+
+.branding {
+  font-family:  "Comfortaa", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 900;
+}
+
+#menu {
+    list-style-type: none;
+    margin: 0px 30px 0 0;
+    float: right;
+}
+
+#menu li {
+    display: inline;
+    padding: 10px 10px 10px 10px;
+    color: white;
+    font-weight: lighter;
+    font-size: 20px;
+}
+
+#menu li:hover {
+    background-color: black;
+    border-radius: 80px;
+    color: white;
+}
+
+a {
+    text-decoration: none;
+}
