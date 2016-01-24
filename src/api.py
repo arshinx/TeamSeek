@@ -2,17 +2,25 @@ import cherrypy
 import json
 import edit_project
 import add_project
+import projects
 
 class WebRoutes(object):
     def __init__(self, db=None):
         if db:
             # mount /api/edit_project/ page
             # receiving PUT request only
+            # require: project_id, title
             self.edit_project = edit_project.Page(db)
 
             # mount /api/add_project/ page
-            # Receiving POST only
+            # receiving POST only
+            # require: title, owner
             self.add_project = add_project.Page(db)
+
+            # mount /api/my_project/ page
+            # receiving GET only
+            # require: owner
+            self.my_projects = projects.MyProjects(db)
         else:
             print "api.py >> Error: Invalid database connection"
 
