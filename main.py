@@ -10,6 +10,7 @@ from src import db
 from src import skills
 from src import add_project
 from src import edit_project
+from src import projects
 
 # Default port number
 PORT = 8080
@@ -54,19 +55,7 @@ class Router(object):
         return pystache.render(self.mainTemplate, {'page_body':readPage('welcome')})
 
     # mount the targets from api.WebRoutes at /api/
-    api = api.WebRoutes()
-
-    # mount the targets from skills.Fetch at /skills/
-    # pass database connection to Fetch() object
-    skills = skills.Fetch(db.connection)
-
-    # mount the targets from add_project.addProject at /add_project/
-    # pass database connection into class object
-    add_project = add_project.addProject(db.connection)
-
-    # mount target from /edit_project/
-    # pass database connection into the object
-    edit_project = edit_project.editProject(db.connection)
+    api = api.WebRoutes(db)
 
 
 """ Start application """
