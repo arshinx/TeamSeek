@@ -7,10 +7,6 @@ import os
 
 from src import api
 from src import db
-from src import skills
-from src import add_project
-from src import edit_project
-from src import projects
 
 # Default port number
 PORT = 8080
