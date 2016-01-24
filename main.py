@@ -9,6 +9,7 @@ from src import api
 from src import db
 from src import skills
 from src import add_project
+from src import edit_project
 
 # Default port number
 PORT = 8080
@@ -62,6 +63,10 @@ class Router(object):
     # mount the targets from add_project.addProject at /add_project/
     # pass database connection into class object
     add_project = add_project.addProject(db.connection)
+
+    # mount target from /edit_project/
+    # pass database connection into the object
+    edit_project = edit_project.editProject(db.connection)
 
 
 """ Start application """
