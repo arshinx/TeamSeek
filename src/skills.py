@@ -44,10 +44,10 @@ class Fetch(object):
         # started with the entered 'q' string
         # with the most frequently used
         query = """
-            SELECT skill
-            FROM nv_test
-            WHERE skill LIKE %s
-            ORDER BY used_count DESC
+            SELECT name
+            FROM skills
+            WHERE name LIKE %s
+            ORDER BY count DESC
             LIMIT 5;
         """
         cur.execute(query, (q + "%",))          # Prevent SQL injection
