@@ -69,4 +69,4 @@ def render(path, params, getCookies, setCookies):
         return cache.get('page').render({'page_body':cache.getRaw('welcome')})
     else:
         # TODO, make sure the user has a valid session token
-        return cache.getRaw('dashboard')
+        return cache.get('layout').render({'page_body':cache.getRaw('dashboard')})
