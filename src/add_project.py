@@ -1,5 +1,7 @@
 import cherrypy
 import json
+from datetime import date
+
 
 class addProject(object):
     """ Accessed from /add_project/ """
@@ -35,22 +37,30 @@ class addProject(object):
 
         :return: json formatted the result/error.
         """
+        # If title is blank
+        if not title:
+            return json.dumps({"error": "Title field cannot be blank"})
+        # If owner is blank (someone is trying something fishy)
+        if not owner:
+            return json.dumps({"error": "You shouldn't be here!"})
+
         # Getting cursor from connection
         cur = self.connection.cursor()
         # Check if owner exists (prevent spamming)
         cur.execute("SELECT user_id FROM users WHERE username=%s", (owner,))
-        # If title is blank, owner is blank,
-        # or owner doesn't exist in database
-        if not title or not owner or not cur.fetchall():
-            return json.dumps('fail')
+        # If owner doesn't exist in database (someone is trying something fishy)
+        if not cur.fetchall():
+            return json.dumps({"error": "You shouldn't be here!"})
         # Execute SQL command
         query = """
-                INSERT INTO project_info (title, owner, short_desc, long_desc, skills_need)
-                VALUES (%s, %s, %s, %s, %s);
+                INSERT INTO project_info
+                (title, owner, short_desc, long_desc, skills_need, last_edit, posted_date)
+                VALUES (%s, %s, %s, %s, %s, %s, %s);
                 """
-        cur.execute(query, (title, owner, short_desc, long_desc, skills_need,)) # Prevent SQL injection
+        query_params = (title, owner, short_desc, long_desc, skills_need, date.today(), date.today(), )
+        cur.execute(query, query_params)    # Prevent SQL injection
         # Apply changes to database
         self.connection.commit()
-        return json.dumps('success')
+        return json.dumps({})
 
 

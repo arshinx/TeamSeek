@@ -22,7 +22,8 @@ CREATE TABLE project_info (
 	short_desc TEXT,
 	long_desc TEXT,
 	skills_need TEXT,
-	last_edit DATE
+	last_edit DATE,
+	posted_date DATE
 	);
 
 CREATE TABLE project_extras (
