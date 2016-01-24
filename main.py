@@ -5,22 +5,12 @@ import cherrypy
 import json
 import os
 
+from src import slug
 from src import api
 from src import db
 
 # Default port number
 PORT = 8080
-
-
-# Template page functions
-def pagePath(pageName):
-    """ Return the path for template pages """
-    return os.path.join('views', pageName + '.html')
-
-def readPage(pageName):
-    """ Read data from template pages """
-    with open(pagePath(pageName)) as f:
-        return f.read()
 
 
 # Overwrite port if env.CHERRYPY_PORT is defined
@@ -41,14 +31,9 @@ class Router(object):
                   'tools.staticdir.dir' : staticDir
     }
 
-    def __init__(self):
-        with open(pagePath('page')) as f:
-            fileData = f.read()
-        self.mainTemplate = pystache.parse(unicode(fileData, 'utf-8'))
     @cherrypy.expose
-    def default(self, **params):
-        """ default() is served at "/" """
-        return pystache.render(self.mainTemplate, {'page_body':readPage('welcome')})
+    def default(self, *path, **params):
+        return slug.render(path, params, cherrypy.request.cookie, cherrypy.response.cookie)
 
     # mount the targets from api.WebRoutes at /api/
     api = api.WebRoutes(db)
