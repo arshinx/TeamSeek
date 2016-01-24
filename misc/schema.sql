@@ -1,23 +1,23 @@
 CREATE TABLE users (
 	user_id SERIAL PRIMARY KEY,
-	username CHAR(64) NOT NULL,
-	email CHAR(128),
+	username VARCHAR NOT NULL,
+	email VARCHAR,
 	join_date DATE);
 
 CREATE TABLE user_extras (
 	user_id INT PRIMARY KEY,
-	first_name CHAR(64),
-	last_name CHAR(64),
+	first_name VARCHAR,
+	last_name VARCHAR,
 	gender CHAR(1),
 	skills TEXT,
 	bio TEXT,
 	projects TEXT,
-	avatar CHAR(256)
+	avatar VARCHAR
 	);
 
 CREATE TABLE project_info (
 	project_id SERIAL PRIMARY KEY,
-	owner CHAR(64),
+	owner VARCHAR,
 	title TEXT,
 	short_desc TEXT,
 	long_desc TEXT,
@@ -30,12 +30,18 @@ CREATE TABLE project_extras (
 	project_id INT,
 	update TEXT,
 	members TEXT,
-	git_link CHAR(256)
+	git_link VARCHAR
 	);
 
 CREATE TABLE applications (
 	project_id INT,
 	user_id INT,
-	status CHAR(16),
+	status VARCHAR,
 	date_applied DATE
 	);
+
+CREATE TABLE skills (
+    name VARCHAR,
+    approved BOOLEAN,
+    count INT
+);
