@@ -41,10 +41,9 @@ class Page:
         return pystache.render(self.template, renderParam)
     def fresh(self):
         """ Return True if cached data is fresh """
-        # TODO add logic to detect if file has changed
         if NO_CACHE:
             return False
-        return True
+        return os.path.getmtime(pagePath(self.pageName))<=self.lastUpdated
 
 class PageCache:
     ram = {}
