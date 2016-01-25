@@ -1,5 +1,6 @@
 import os
 import time
+import json
 import cherrypy
 import pystache
 
@@ -35,6 +36,8 @@ class Page:
         self.lastUpdated = time.time()
     def render(self, renderParam):
         """ Render {{ mustache }} blocks """
+        if 'initial_data' not in renderParam:
+            renderParam['initial_data'] = json.dumps({});
         return pystache.render(self.template, renderParam)
     def fresh(self):
         """ Return True if cached data is fresh """
@@ -73,4 +76,8 @@ def render(path, params, session):
         return cache.get('layout').render({'page_body':cache.getRaw('welcome')})
     else:
         # TODO, make sure the user has a valid session token
-        return cache.get('layout').render({'page_body':cache.getRaw('dashboard')})
+        initial_data = {'user':session.get('user')}
+        return cache.get('layout').render({
+            'page_body':cache.getRaw('dashboard'),
+            'initial_data':json.dumps(initial_data)
+        })

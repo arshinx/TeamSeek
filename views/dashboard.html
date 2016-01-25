@@ -36,10 +36,10 @@
       </div>
     </div>
     <!-- Right panel -->
-    <div class="smallitem">
+    <div class="smallitem" id="notifications">
       <div class="displayitem">
         <h2>Notifications</h2>
-        <p><i>No new notifications</i></p>
+        <p><i>Welcome back, {{user}}</i></p>
       </div>
       <div class="displayitem">
         <h2>My Ideas</h2>
@@ -59,3 +59,9 @@
     </div>
   </div>
 </div>
+<script>
+var notifications = new Vue({
+  el: '#notifications',
+  data: _onload_data
+});
+</script>

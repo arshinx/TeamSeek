@@ -42,10 +42,28 @@
 </style>
 <div class="hands">
   <div class="content">
-    <div class="container">
+    <div id="centerbox" class="container">
       <div id="slogan">Share Knowledge. Find Peers.<br />Start Developing.</div>
-      <a href="javascript:(function() {document.cookie='session=test';document.location='/' })();"
-         class="button" id="get-started" >Get Started!</a>
+      <a v-on:click="getStarted()" class="button" id="get-started" >Get Started!</a>
     </div>
   </div>
 </div>
+<script>
+  var welcome = new Vue({
+    el: '#centerbox',
+    methods: {
+      getStarted: function() {
+        // Get username string from user
+        var user = prompt('Debug feature: enter username to log in as');
+        if (user) {
+          this.$http.get('/api/auth/debug', {user:user}).then(function() {
+            // Refresh page for changes to take effect.
+            document.location = '/';
+          }, function() {
+            console.log('failure');
+          });
+        }
+      }
+    }
+  });
+</script>
