@@ -70,7 +70,7 @@ def render(path, params, getCookies, setCookies):
         return "Page not mapped"
     if 'session' not in getCookies:
         # If session info does not exist render the welcome page
-        return cache.get('page').render({'page_body':cache.getRaw('welcome')})
+        return cache.get('layout').render({'page_body':cache.getRaw('welcome')})
     else:
         # TODO, make sure the user has a valid session token
         return cache.get('layout').render({'page_body':cache.getRaw('dashboard')})
