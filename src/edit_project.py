@@ -2,9 +2,6 @@ import cherrypy
 import json
 from datetime import date
 
-# To test code, please uncomment the command below
-# cherrypy.session['user'] = 'gnihton'
-
 
 class Page(object):
     """ Accessed from /api/edit_project/ """

@@ -17,10 +17,6 @@ class ProjectFeeds(object):
     """ This handles forwarding HTTP request methods """
     @cherrypy.expose
     def index(self):
-        # When testing, please uncomment the command below
-        # Otherwise, there's no other way to test
-        cherrypy.session['user'] = 'gnihton'
-
         # Checking if user is logged in
         # Don't let anyone trying something fishy
         if 'user' not in cherrypy.session:
