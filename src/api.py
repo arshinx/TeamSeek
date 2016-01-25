@@ -24,6 +24,10 @@ class WebRoutes(object):
             # require: cherrypy.session['user']
             self.feed = feed.ProjectFeeds(db)
 
+            # mount /apt/project_details/ page
+            # require: user, title
+            self.project_details = projects.ProjectDetails(db)
+
             # mount /api/auth/ page
             # maps /api/auth/github and /api/auth/debug
             self.auth = auth.WebRoutes()
