@@ -73,11 +73,17 @@ def render(path, params, session):
         return "Page not mapped"
     if 'user' not in session:
         # If session info does not exist render the welcome page
-        return cache.get('layout').render({'page_body':cache.getRaw('welcome')})
+        return cache.get('layout').render({
+            'page_body':cache.getRaw('welcome'),
+            'account_url': '/api/auth/login',
+            'account_action': 'Log In'
+        })
     else:
         # TODO, make sure the user has a valid session token
         initial_data = {'user':session.get('user')}
         return cache.get('layout').render({
             'page_body':cache.getRaw('dashboard'),
+            'account_url': '/api/auth/logout',
+            'account_action': 'Log Out',
             'initial_data':json.dumps(initial_data)
         })

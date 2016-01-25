@@ -13,6 +13,10 @@ class WebRoutes(object):
     def github(self, **params):
         return json.dumps({'error':'auth target not yet supported'})
     @cherrypy.expose
+    def logout(self, **params):
+        cherrypy.session.delete()
+        raise cherrypy.HTTPRedirect("/")
+    @cherrypy.expose
     def debug(self, **params):
         if not ALLOW_DEBUG_LOGIN:
             return json.dumps({'error':'debug auth not supported'})
