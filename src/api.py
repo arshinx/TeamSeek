@@ -2,6 +2,7 @@ import cherrypy
 import json
 import edit_project
 import projects
+import auth
 
 class WebRoutes(object):
     def __init__(self, db=None):
@@ -17,6 +18,10 @@ class WebRoutes(object):
             # receiving GET only
             # require: cherrypy.session['user']
             self.my_projects = projects.MyProjects(db)
+
+            # mount /api/auth/ page
+            # maps /api/auth/github and /api/auth/debug
+            self.auth = auth.WebRoutes()
         else:
             print "api.py >> Error: Invalid database connection"
 
