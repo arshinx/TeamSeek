@@ -1,10 +1,6 @@
 import cherrypy
 import json
 
-# When testing, please uncomment the command below
-# Otherwise, there's no other way to test
-# cherrypy.session['user'] = 'gnihton'
-
 
 class MyProjects(object):
     def __init__(self, db=None):
@@ -23,6 +19,10 @@ class MyProjects(object):
     @cherrypy.expose
     def index(self):
         """ Forwarding to Request handlers below """
+        # When testing, please uncomment the command below
+        # Otherwise, there's no other way to test
+        # cherrypy.session['user'] = 'gnihton'
+
         # Is user provided Something is fishy if it's not provided
         if 'user' not in cherrypy.session:
             return json.dumps({'error':"You shouldn't be here"})
@@ -55,41 +55,12 @@ class MyProjects(object):
         if not fetch:
             return json.dumps({'error':'No project'})
 
-        # Begin adding project into a list
-        project_list = []     # List of projects
-        for project in fetch:
-            # Project's details
-            dict = {'project_id': project[0],
-                    'title': project[1],
-                    'owner': project[2],
-                    'short_desc': project[3],
-                    'project_skills': '',
-                    'last_edit': str(project[4]),
-                    'posted_date': str(project[5]),
-                    'update': '',
-                    'project_members': '',
-                    'git_link': ''
-                    }
+        # Format project details
+        project_details = self.fetch_project_details(cur, fetch)
 
-            # Getting skills
-            skills = self.fetch_project_skills(cur, dict['project_id'])
-            dict['project_skills'] = skills
 
-            # Get updates/git_link
-            project_extras = self.fetch_project_extras(cur, dict['project_id'])
-            if project_extras:
-                dict['update'] = project_extras[0]
-                dict['git_link'] = project_extras[1]
-
-            # Get project_members
-            project_members = self.fetch_project_members(cur, dict['project_id'])
-            dict['project_members'] = project_members
-
-            # Adding the project's details into the list
-            project_list.append(dict)
-
-        print json.dumps(project_list, indent=4)  # for debugging
-        return json.dumps(project_list, indent=4)   # for returning on webpage
+        print json.dumps(project_details, indent=4)  # for debugging
+        return json.dumps(project_details, indent=4)   # for returning on webpage
 
     def POST(self):
         return json.dumps({'error': 'POST request is not supported'})
@@ -140,6 +111,7 @@ class MyProjects(object):
         # Format: [update, git_link]
         return result
 
+    """ Fetching project_members """
     def fetch_project_members(self, cur, project_id=None):
         # Return a list of [member1, member2, ...]
         # Fetching database
@@ -157,3 +129,40 @@ class MyProjects(object):
 
         # Return a list
         return result
+
+    """ Formating project details """
+    def fetch_project_details(self, cur, fetch=None):
+        # Begin adding project into a list
+        project_list = []     # List of projects
+        for project in fetch:
+            # Project's details
+            dict = {'project_id': project[0],
+                    'title': project[1],
+                    'owner': project[2],
+                    'short_desc': project[3],
+                    'project_skills': '',
+                    'last_edit': str(project[4]),
+                    'posted_date': str(project[5]),
+                    'update': '',
+                    'project_members': '',
+                    'git_link': ''
+                    }
+
+            # Getting skills
+            skills = self.fetch_project_skills(cur, dict['project_id'])
+            dict['project_skills'] = skills
+
+            # Get updates/git_link
+            project_extras = self.fetch_project_extras(cur, dict['project_id'])
+            if project_extras:
+                dict['update'] = project_extras[0]
+                dict['git_link'] = project_extras[1]
+
+            # Get project_members
+            project_members = self.fetch_project_members(cur, dict['project_id'])
+            dict['project_members'] = project_members
+
+            # Adding the project's details into the list
+            project_list.append(dict)
+
+        return project_list

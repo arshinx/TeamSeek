@@ -1,5 +1,6 @@
 import cherrypy
 import json
+from projects import MyProjects
 
 """ This class handles getting Project Feeds for Dashboard """
 """ Access using /api/feed/ """
@@ -9,39 +10,62 @@ class ProjectFeeds(object):
     def __init__(self, db=None):
         if db:
             self.db = db
+            self.cur = db.connection.cursor()
         else:
             print "feed.py >>  Error: Invalid database connection"
 
     """ This handles forwarding HTTP request methods """
     @cherrypy.expose
-    def index(self, **params):
+    def index(self):
+        # When testing, please uncomment the command below
+        # Otherwise, there's no other way to test
+        cherrypy.session['user'] = 'gnihton'
+
+        # Checking if user is logged in
+        # Don't let anyone trying something fishy
+        if 'user' not in cherrypy.session:
+            return json.dumps({"error": "You shouldn't be here"})
+
+        # Forwarding HTTP request
         http_method = getattr(self, cherrypy.request.method)
-        return http_method(**params)
+        return http_method()
 
     """ Handling GET method """
     @cherrypy.tools.accept(media='text/plain')
-    def GET(self, **params):
+    def GET(self):
         """
-        :param params: skills (required), and some other things after implemented
         :return: JSON format of projects
         """
-        # Check if skills variable is provided
-        if 'skills' not in params:
-            return json.dumps({"error": "Skills aren't provided"})
-        # Put all skills into a list
-        # skills are separated by commas
-        skills = params['skills'].split(',')
+        # Getting user
+        user = cherrypy.session['user']
 
-        # Prepare elements for database query
-        query_params = ()
-        wild_skill_string = "skills_need=%"
-        for skill in skills:
+        # Getting skills
+        user_skills = self.fetch_user_skills(user)
 
+        # Getting all project_id's that have a list of skills
+        project_ids = self.fetch_project_id(user_skills)
 
-        # Getting cursor from database connection
-        cur = self.db.connection.cursor()
+        # Can't find any projects
+        if not project_ids:
+            return json.dumps({"error": "Don't have any project to display"})
 
-        return
+        # Fetching project details of the project_id
+        fetch = []
+        for i in project_ids:
+            query = """
+                    SELECT project_id,title, owner, short_desc, last_edit, posted_date
+                    FROM project_info
+                    WHERE project_id=%s
+                    """
+            self.cur.execute(query, (i, ))
+            item = self.cur.fetchall()[0]
+            fetch.append(item)
+
+        # Re-using projects.MyProjects().fetch_project_details(cur, fetch)
+        my_project = MyProjects()
+        project_details = my_project.fetch_project_details(self.cur, fetch)
+
+        return json.dumps(project_details[:10])
 
     """ Handling POST method """
     def POST(self):
@@ -54,3 +78,56 @@ class ProjectFeeds(object):
     """ Handling DELETE method """
     def DELETE(self):
         return json.dumps({"error": "DELETE request is not supported"})
+
+    """ Fetch user_skills """
+    def fetch_user_skills(self, user=None):
+        # Return a list of user's skills
+        # Fetch user_id
+        user_id = self.fetch_user_id(user)
+        # Fetching from database
+        query = """
+                SELECT skill
+                FROM user_skills
+                WHERE user_id=%s
+                """
+        self.cur.execute(query, (user_id, ))
+        # Declaring a list
+        skills = []
+        # Append skills into a list
+        for item in self.cur.fetchall():
+            skills.append(item[0])
+
+        return skills
+
+    """ Fetch user_id """
+    def fetch_user_id(self, user=None):
+        # Used for fetch_user_skills above
+        query = """
+                SELECT user_id
+                FROM users
+                WHERE username=%s
+                """
+        self.cur.execute(query, (user, ))
+        fetch = self.cur.fetchall()
+        if not fetch:
+            return 0
+        user_id = fetch[0][0]
+        return user_id
+
+    """ Fetch project_id's """
+    def fetch_project_id(self, skills=None):
+        # Returning a list of project_id's
+        project_ids = []
+
+        # Fetching all project_ids
+        query = """
+                SELECT project_id
+                FROM project_skills
+                WHERE skill=%s
+                """
+        for skill in skills:
+            self.cur.execute(query, (skill, ))
+            for i in self.cur.fetchall():
+                project_ids.append(i[0])
+
+        return project_ids
