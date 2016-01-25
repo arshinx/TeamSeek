@@ -4,16 +4,33 @@ from datetime import date
 
 
 class Page(object):
-    """ Accessed from /edit_project/ """
+    """ Accessed from /api/edit_project/ """
+
+    """ Format for mapping """
+    # Example: {"action": "edit_title", "project_id": "4", "data": "Testing-change"}
+    # Example: {"action": "edit_short_desc", "project_id": "4", "data": "Testing-change"}
+    _ACTION = {
+        'edit_title': ['project_info', 'title'],
+        'edit_short_desc': ['project_info', 'short_desc'],
+        'edit_long_desc': ['project_info', 'long_desc'],
+        'delete_skill': ['project_skills', 'skill'],
+        'add_skill': ['project_skills', 'skill'],
+        'edit_update': ['project_extras', 'update'],
+        'edit_git_link': ['project_extras', 'git_link'],
+        'add_member': ['project_members', 'member'],
+        'delete_member': ['project_members', 'member']
+    }
+
+    """ Get database object when initialized """
     def __init__(self, db=None):
         if db:
             self.db = db
         else:
             print "Error: Database connection invalid"
 
+    """ Forwarding to Request handlers """
     @cherrypy.expose
     def index(self, **params):
-        """ Forwarding to Request handlers """
         http_method = getattr(self, cherrypy.request.method)
         return http_method(**params)
 
@@ -21,146 +38,64 @@ class Page(object):
     @cherrypy.tools.accept(media='text/plain')
     def PUT(self, **params):
         """
-        Handling POST request
+        Handling PUT request
 
-        :param project_id: project's id (required)
-        :param title: project's title (optional)
-        :param owner: project's owner (required)
-        :param short_desc: project's short description (optional)
-        :param long_desc: project's long description (optional)
-        :param skills_need: array/list of skills needed for project (optional)
-        :param update: Update of project. I.e. Added a function (optional)
-        :param members: Members of project. I.e. member_a, member_b, member_c (optional)
-        :param git_link: i.e. http://github.com/TeamSeek (optional)
-        :return: success/fail
+        :param: i.e. {"action": "edit_title", "project_id": "4", "data": "Testing-change"}
+        :return: error or {}
         """
-        # If project_id isn't provided
-        if 'project_id' not in params:
-            print "project_id isn't provided"
-            return json.dumps({"error": "Project ID must be provided!"})
-
-        # If owner is blank
-        if 'owner' not in params:
-            print "owner isn't provided"
-            return json.dumps({"error": "You shouldn't be here"})
-
-        # Check if user is authorized to edit
+        # Getting database connection cursor
         cur = self.db.connection.cursor()
-        query = """
-                SELECT * FROM project_info WHERE project_id=%s AND owner=%s
-                """
-        cur.execute(query, (params['project_id'], params['owner'], ))   # Prevent SQL injection
-        if not cur.fetchall():
-            print "You're not authorized"
-            return json.dumps({"error": "You're not authorized to edit this post!"})
 
-        # Check if new title is existed under this user
-        if self.isExist(cur, **params):
-            return json.dumps({"error": "You already have this project!"})
+        # Check that everything is right
+        if 'action' not in params or \
+           'project_id' not in params or \
+           'data' not in params:
+            return json.dumps({"error": "Not enough data"})
 
-        # The user is now authorized to edit.
-        self.edit_project_info(cur, **params)
+        # Get everything needed to edit
+        action = params['action']
+        # Mapping table using _ACTION variable above
+        table = self._ACTION[action][0]
+        # Mapping column using _ACTION variable above
+        column = self._ACTION[action][1]
+        # Get project_id from params
+        project_id = params['project_id']
+        # Get data from params
+        data = params['data']
 
-        self.edit_project_extras(cur, **params)
-        # If need debugging
-        # print query
-        # print params
+        # Check if this is to delete (special)
+        if (action == 'delete_skill') or \
+           (action == 'delete_member'):
+            # Call delete method below
+            self.delete(cur, column, table, project_id, data)
+            # Update last_edit column
+            self.update_last_edit(cur, project_id)
+            return json.dumps({})
 
+        # Check if this is to insert (special)
+        if (action == 'add_skill') or \
+           (action == 'add_member'):
+            # Call insert method below
+            self.insert(cur, column, table, project_id, data)
+            # Update last_edit column
+            self.update_last_edit(cur, project_id)
+            return json.dumps({})
+
+        # If editing values
+        # Execute this command
+        # Don't worry about SQL Injection because
+        # table and column are mapped, not user input
+        query = "UPDATE " + table + " SET " + column + " = %s WHERE project_id=%s;"
+        cur.execute(query, (data, project_id, ))
+        # Commit the changes to database
+        self.db.connection.commit()
+        # Update last_edit column
+        self.update_last_edit(cur, project_id)
+
+        # If everything succeeded, return nothing
         return json.dumps({})
 
-    # Helper functions for PUT request
-    def edit_project_info(self, cur=None, **params):
-        """ Editing anything that's in project_info table """
-        columns = "("       # forming columns string
-        values = "("        # forming values string
-        query_params = ()         # forming parameters tuple for cur.execute()
-
-        # Check if title needs to be edited
-        if 'title' in params:
-            columns += "title, "
-            values += "%s, "
-            title = params["title"]
-            query_params += (title, )
-        # Check if short description needs to be edited
-        if 'short_desc' in params:
-            columns += "short_desc, "
-            values += "%s, "
-            short_desc = params['short_desc']
-            query_params += (short_desc, )
-        # Check if long description needs to be edited
-        if 'long_desc' in params:
-            columns += "long_desc, "
-            values += "%s, "
-            long_desc = params['long_desc']
-            query_params += (long_desc, )
-        # Check if skills required need to be edited
-        if 'skills_need' in params:
-            columns += "skills_need, "
-            values += "%s, "
-            skills_need = params['skills_need']
-            query_params += (skills_need, )
-        # Lastly, add last_edit time
-        columns += "last_edit)"                 # Containing name of columns (column 1, column 2)
-        values += "%s)"                         # Containing (%s, %s, %s) all the %s's
-        project_id = params['project_id']
-        query_params += (date.today(), project_id, )  # Containing tuple of variables
-
-        # Now, start editing
-        query = "UPDATE project_info SET " + columns + " = " + values + " WHERE project_id = %s"
-        cur.execute(query, query_params)
-        self.db.connection.commit()
-        return;
-
-    def edit_project_extras(self, cur=None, **params):
-        """ Editing anything that's in project_extras table """
-        columns = "("       # forming columns string
-        values = "("        # forming values string
-        query_params = ()         # forming parameters tuple for cur.execute()
-        if 'update' in params:
-            columns += 'update, '
-            values += '%s, '
-            query_params += (params['update'], )
-        if 'members' in params:
-            columns += 'members, '
-            values += '%s, '
-            query_params += (params['members'], )
-        if 'git_link' in params:
-            columns += 'git_link, '
-            values += '%s, '
-            query_params += (params['git_link'], )
-        columns += 'project_id)'
-        values += '%s)'
-        # project_id = params['project_id']
-        query_params += (params['project_id'], params['project_id'], )
-        query = "UPDATE project_extras SET " + columns + " = " + values + " WHERE project_id = %s"
-        print columns
-        print values
-        print query_params
-        print query
-        cur.execute(query, query_params)
-        self.db.connection.commit()
-        return
-
-    def isExist(self, cur=None, **params):
-        """ Checking if the title is already existed under this user """
-        # Is the user changing title?
-        if 'title' not in params:
-            return False
-
-        # Check if title is already existed under the user
-        query = """
-                SELECT * FROM project_info
-                WHERE owner=%s AND title=%s;
-                """
-        cur.execute(query, (params['owner'], params['title'], ))
-        # If there is project
-        if cur.fetchall():
-            return True
-
-        # Project isn't registered under this username yet
-        return False
-
-    """ Other HTTP requests """
+    """ Other non-supported HTTP requests """
     def GET(self):
         return json.dumps({"error": "GET is not supported"})
 
@@ -169,3 +104,24 @@ class Page(object):
 
     def POST(self):
         return json.dump({"error": "POST is not supported"})
+
+    """ Handle deleting a row specified from _ACTION """
+    def delete(self, cur=None, column=None, table=None, project_id=None, data=None):
+        query = "DELETE FROM " + table + " WHERE " + column + "=%s AND project_id=%s;"
+        cur.execute(query, (data, project_id, ))
+        self.db.connection.commit()
+        return
+
+    """ Handle inserting a row specified from _ACTION """
+    def insert(self, cur=None, column=None, table=None, project_id=None, data=None):
+        query = "INSERT INTO " + table + "(" + column + ", project_id) VALUES (%s, %s);"
+        cur.execute(query, (data, project_id, ))
+        self.db.connection.commit()
+        return
+
+    """ Handle updating last_edit """
+    def update_last_edit(self, cur=None, project_id=None):
+        query = "UPDATE project_info SET last_edit=%s WHERE project_id=%s"
+        cur.execute(query, (date.today(), project_id, ))
+        self.db.connection.commit()
+        return

@@ -9,7 +9,7 @@ class WebRoutes(object):
         if db:
             # mount /api/edit_project/ page
             # receiving PUT request only
-            # require: project_id, title
+            # require: {'action': 'see edit_project.py', 'project_id': '', 'data': 'what need to change'}
             self.edit_project = edit_project.Page(db)
 
             # mount /api/add_project/ page
@@ -17,7 +17,7 @@ class WebRoutes(object):
             # require: title, owner
             self.add_project = add_project.Page(db)
 
-            # mount /api/my_project/ page
+            # mount /api/my_projects/ page
             # receiving GET only
             # require: owner
             self.my_projects = projects.MyProjects(db)
