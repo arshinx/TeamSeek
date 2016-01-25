@@ -27,10 +27,11 @@ db = db.PostgreSQL()
 
 class Router(object):
     """ Main router object for Teamseek """
-    _cp_config = {'tools.staticdir.on' : True,
-                  'tools.staticdir.dir' : staticDir,
-                  'tools.sessions.on' : True,
-                  'tools.sessions.timeout' : 60 * 24
+    _cp_config = {
+        'tools.staticdir.on' : True,
+        'tools.staticdir.dir' : staticDir,
+        'tools.sessions.on' : True,
+        'tools.sessions.timeout' : 60 * 24
     }
 
     @cherrypy.expose
