@@ -65,10 +65,10 @@ class PageCache:
 
 cache = PageCache()
 
-def render(path, params, getCookies, setCookies):
+def render(path, params, session):
     if len(path) != 0:
         return "Page not mapped"
-    if 'session' not in getCookies:
+    if 'user' not in session:
         # If session info does not exist render the welcome page
         return cache.get('layout').render({'page_body':cache.getRaw('welcome')})
     else:

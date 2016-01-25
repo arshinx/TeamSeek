@@ -36,7 +36,7 @@ class Router(object):
 
     @cherrypy.expose
     def default(self, *path, **params):
-        return slug.render(path, params, cherrypy.request.cookie, cherrypy.response.cookie)
+        return slug.render(path, params, cherrypy.session)
 
     # mount the targets from api.WebRoutes at /api/
     api = api.WebRoutes(db)
