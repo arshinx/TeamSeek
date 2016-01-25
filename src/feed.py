@@ -43,7 +43,7 @@ class ProjectFeeds(object):
 
         # Can't find any projects
         if not project_ids:
-            return json.dumps({"error": "Don't have any project to display"})
+            return json.dumps([])
 
         # Fetching project details of the project_id
         fetch = []
