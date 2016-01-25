@@ -11,19 +11,18 @@ CREATE TABLE user_extras (
 	last_name VARCHAR,
 	gender CHAR(1),
 	bio TEXT,
-	projects TEXT,
 	avatar VARCHAR
 	);
 
 CREATE TABLE user_skills (
     user_id INT,
-    skill TEXT
+    skill VARCHAR
     );
 
 CREATE TABLE project_info (
 	project_id SERIAL PRIMARY KEY,
 	owner VARCHAR,
-	title TEXT,
+	title VARCHAR,
 	short_desc TEXT,
 	long_desc TEXT,
 	last_edit DATE,
@@ -32,13 +31,17 @@ CREATE TABLE project_info (
 
 CREATE TABLE project_skills (
     project_id INT,
-    skill TEXT
+    skill VARCHAR
+    );
+
+CREATE TABLE project_members (
+    project_id INT,
+    member VARCHAR
     );
 
 CREATE TABLE project_extras (
 	project_id INT,
 	update TEXT,
-	members TEXT,
 	git_link VARCHAR
 	);
 
