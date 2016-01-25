@@ -1,6 +1,10 @@
 import cherrypy
 import json
 
+# When testing, please uncomment the command below
+# Otherwise, there's no other way to test
+# cherrypy.session['user'] = 'gnihton'
+
 
 class MyProjects(object):
     def __init__(self, db=None):
@@ -19,10 +23,6 @@ class MyProjects(object):
     @cherrypy.expose
     def index(self):
         """ Forwarding to Request handlers below """
-        # When testing, please uncomment the command below
-        # Otherwise, there's no other way to test
-        # cherrypy.session['user'] = 'gnihton'
-
         # Is user provided Something is fishy if it's not provided
         if 'user' not in cherrypy.session:
             return json.dumps({'error':"You shouldn't be here"})
