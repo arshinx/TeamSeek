@@ -1,12 +1,12 @@
 <style>
-#spinnerBox {
+.spinnerBox {
   width: 200px;
   height:200px;
   position: relative;
   margin: auto;
 }
 
-#spinnerBox .spinner {
+.spinnerBox .spinner {
   /* important! required to overided style from spinner.js */
   position: relative !important;
 }
@@ -16,7 +16,8 @@
     <!-- Left panel -->
     <div class="bigitem">
       <div class="displayitem" id="projectdisplay">
-        <div v-if="showSpinner" id="spinnerBox"></div>
+        <h2>Projects</h2>
+        <div v-if="showSpinner" class="spinnerBox" id="spinnerBox"></div>
         <div class="projectbox" v-for="project in projects" v-cloak>
           <img align=left
                src="http://www.gravatar.com/avatar/3b3be63a4c2a439b013787725dfce802?d=identicon">
@@ -25,7 +26,7 @@
           <p>Team Leader: {{project.owner}}<p>
           <p>{{project.short_desc}}</p>
         </div>
-        <p v-if="projects.length == 0 && ! showSpinner">No Projects found<p>
+        <p v-if="projects.length == 0 && ! showSpinner">No projects found<p>
         <div style="height:0px;">
           <span class="footer">
             <a href="#">About</a>
@@ -39,30 +40,43 @@
     <div class="smallitem" id="notifications">
       <div class="displayitem">
         <h2>Notifications</h2>
-        <p><i>Welcome back, {{user}}</i></p>
+        <p><i>Welcome back, {{init.user}}.</i></p>
       </div>
       <div class="displayitem">
         <h2>My Ideas</h2>
-        <div class="projectbox">
+        <div v-if="showSpinner" class="spinnerBox" id="ideaSpinnerBox"></div>
+        <div v-for="idea in myIdeas" class="projectbox">
           <img align=left width=40px height=40px
                src="http://www.gravatar.com/avatar/4b3be63a4c2a439b013787725dfce802?d=identicon">
           </img>
-          <p>Project One</p>
+          <p>{{idea.title}}</p>
         </div>
-        <div class="projectbox">
-          <img align=left width=40px height=40px
-               src="http://www.gravatar.com/avatar/4b3be63a4c2a439b013787725dfce802?d=identicon">
-          </img>
-          <p>Project Two</p>
-        </div>
+        <p v-if="myIdeas.length == 0 && ! showSpinner">None found<p>
       </div>
     </div>
   </div>
 </div>
 <script>
+Vue.config.debug = true;
 var notifications = new Vue({
   el: '#notifications',
-  data: _onload_data
+  ready: function() {
+    var target = document.getElementById('ideaSpinnerBox')
+    var spinner = new Spinner(opts).spin(target);
+    this.$http.get('/api/my_projects').then(function (response) {
+      console.log(response.data);
+      this.myIdeas = response.data;
+      this.showSpinner = false;
+    }, function (response) {
+      // error callback
+      this.showSpinner = false;
+    });
+  },
+  data: {
+    init: _onload_data,
+    myIdeas: [],
+    showSpinner: true
+  }
 });
 
 var opts = {
@@ -95,7 +109,6 @@ var projectdisplay = new Vue({
     var spinner = new Spinner(opts).spin(target);
     this.$http.get('/api/feed').then(function (response) {
       this.projects = response.data;
-      console.log(response.data);
       this.showSpinner = false;
     }, function (response) {
       // error callback
@@ -104,6 +117,7 @@ var projectdisplay = new Vue({
   },
   data: {
     projects: [],
+    myIdeas: [],
     showSpinner: true
   }
 });
