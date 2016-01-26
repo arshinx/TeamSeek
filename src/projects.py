@@ -39,9 +39,13 @@ class MyProjects(object):
 
         # Getting owner's projects
         query = """
-                SELECT project_id,title, owner, short_desc, last_edit, posted_date
-                FROM project_info
-                WHERE owner=%s
+                SELECT  project_info.project_id, title, owner, short_desc, last_edit, posted_date,
+                        update, git_link, skill, member
+                FROM    project_info
+                LEFT JOIN project_extras ON (project_extras.project_id = project_info.project_id)
+                LEFT JOIN project_skills ON (project_skills.project_id = project_info.project_id)
+                LEFT JOIN project_members ON (project_members.project_id = project_info.project_id)
+                WHERE   owner = %s
                 """
         cur.execute(query, (owner, ))     # Prevent SQL injection
         fetch = cur.fetchall()
@@ -51,7 +55,7 @@ class MyProjects(object):
             return json.dumps([])
 
         # Format project details
-        project_details = self.fetch_project_details(cur, fetch)
+        project_details = self.format_project_details(cur, fetch)
 
         # print json.dumps(project_details, indent=4)  # for debugging
         return json.dumps(project_details, indent=4)   # for returning on webpage
@@ -68,67 +72,8 @@ class MyProjects(object):
     def DELETE(self):
         return json.dumps({'error': 'DELETE request is not supported'})
 
-    """ Handling getting project_skills """
-    def fetch_project_skills(self, cur, project_id=None):
-        # Returning project_skills as a list
-        query = """
-                SELECT skill
-                FROM project_skills
-                WHERE project_id=%s
-                """
-        cur.execute(query, (project_id, ))
-        # Declaring a list
-        result = []
-        # Append the fetched skill into list
-        for skill in cur.fetchall():
-            result.append(skill[0])
-        # Return a list
-        return result
-
-    """ Handling getting project_extras """
-    def fetch_project_extras(self, cur, project_id=None):
-        # Return a list of [update, git_link]
-        # Fetching database
-        query = """
-                SELECT update, git_link
-                FROM project_extras
-                WHERE project_id = %s
-                """
-        cur.execute(query, (project_id, ))
-        # Declaring a list
-        result = []
-        # Appending fetched data into list
-        for item in cur.fetchall():
-            # Appending update
-            result.append(item[0])
-            # Appending git_link
-            result.append(item[1])
-
-        # Return a list
-        # Format: [update, git_link]
-        return result
-
-    """ Fetching project_members """
-    def fetch_project_members(self, cur, project_id=None):
-        # Return a list of [member1, member2, ...]
-        # Fetching database
-        query = """
-                SELECT member
-                FROM project_members
-                WHERE project_id = %s
-                """
-        cur.execute(query, (project_id, ))
-        # Declaring a list
-        result = []
-        # Appending all members into list
-        for member in cur.fetchall():
-            result.append(member[0])
-
-        # Return a list
-        return result
-
     """ Formating project details """
-    def fetch_project_details(self, cur, fetch=None):
+    def format_project_details(self, cur, fetch=None):
         # Begin adding project into a list
         project_list = []     # List of projects
         for project in fetch:
@@ -137,28 +82,13 @@ class MyProjects(object):
                     'title': project[1],
                     'owner': project[2],
                     'short_desc': project[3],
-                    'project_skills': '',
                     'last_edit': str(project[4]),
                     'posted_date': str(project[5]),
-                    'update': '',
-                    'project_members': '',
-                    'git_link': ''
+                    'update': project[6],
+                    'git_link': project[7],
+                    'project_skills': project[8],
+                    'project_members': project[9]
                     }
-
-            # Getting skills
-            skills = self.fetch_project_skills(cur, dict['project_id'])
-            dict['project_skills'] = skills
-
-            # Get updates/git_link
-            project_extras = self.fetch_project_extras(cur, dict['project_id'])
-            if project_extras:
-                dict['update'] = project_extras[0]
-                dict['git_link'] = project_extras[1]
-
-            # Get project_members
-            project_members = self.fetch_project_members(cur, dict['project_id'])
-            dict['project_members'] = project_members
-
             # Adding the project's details into the list
             project_list.append(dict)
 
@@ -198,9 +128,13 @@ class ProjectDetails(object):
 
         # Getting project details
         query = """
-                SELECT project_id,title, owner, short_desc, last_edit, posted_date
-                FROM project_info
-                WHERE owner=%s AND title=%s
+                SELECT  project_info.project_id, title, owner, short_desc, last_edit, posted_date,
+                        update, git_link, skill, member
+                FROM    project_info
+                LEFT JOIN project_extras ON (project_extras.project_id = project_info.project_id)
+                LEFT JOIN project_skills ON (project_skills.project_id = project_info.project_id)
+                LEFT JOIN project_members ON (project_members.project_id = project_info.project_id)
+                WHERE   owner=%s AND title=%s
                 """
         self.cur.execute(query, (params['user'], params['title'], ))     # Prevent SQL injection
         fetch = self.cur.fetchall()
@@ -209,7 +143,7 @@ class ProjectDetails(object):
             return json.dumps([])
 
         # Fetch project details
-        project_details = MyProjects(self.db).fetch_project_details(self.cur, fetch=fetch)
+        project_details = MyProjects(self.db).format_project_details(self.cur, fetch=fetch)
         return json.dumps(project_details, indent=4)
 
     """ Handling POST request """
