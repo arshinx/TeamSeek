@@ -53,7 +53,7 @@ class MyProjects(object):
         # Format project details
         project_details = self.fetch_project_details(cur, fetch)
 
-        print json.dumps(project_details, indent=4)  # for debugging
+        # print json.dumps(project_details, indent=4)  # for debugging
         return json.dumps(project_details, indent=4)   # for returning on webpage
 
     """ Handling POST request """

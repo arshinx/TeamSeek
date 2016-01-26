@@ -58,10 +58,10 @@ class ProjectFeeds(object):
             fetch.append(item)
 
         # Re-using projects.MyProjects().fetch_project_details(cur, fetch)
-        my_project = MyProjects()
+        my_project = MyProjects(self.db)
         project_details = my_project.fetch_project_details(self.cur, fetch)
 
-        return json.dumps(project_details[:10])
+        return json.dumps(project_details[:10], indent=4)
 
     """ Handling POST method """
     def POST(self):
@@ -115,15 +115,24 @@ class ProjectFeeds(object):
         # Returning a list of project_id's
         project_ids = []
 
-        # Fetching all project_ids
-        query = """
-                SELECT project_id
-                FROM project_skills
-                WHERE skill=%s
-                """
-        for skill in skills:
-            self.cur.execute(query, (skill, ))
-            for i in self.cur.fetchall():
-                project_ids.append(i[0])
+        # Fetching project_ids that match skills
+        if skills:
+            query = """
+                    SELECT project_id
+                    FROM project_skills
+                    WHERE skill=%s;
+                    """
+            for skill in skills:
+                self.cur.execute(query, (skill, ))
+                for i in self.cur.fetchall():
+                    project_ids.append(i[0])
 
-        return project_ids
+        # If the user is new, and there are no skills
+        # Get every project_ids available
+        else:
+            query = "SELECT project_id FROM project_info ORDER BY posted_date DESC;"
+            self.cur.execute(query)
+            project_ids = [i for (i, ) in self.cur.fetchall()]
+
+        # Return only 10 most recent projects
+        return project_ids[:10]
