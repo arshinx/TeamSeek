@@ -19,8 +19,7 @@
         <h2>Projects</h2>
         <div v-if="showSpinner" class="spinnerBox" id="spinnerBox"></div>
         <div class="projectbox" v-for="project in projects" v-cloak>
-          <img align=left
-               src="http://www.gravatar.com/avatar/3b3be63a4c2a439b013787725dfce802?d=identicon">
+          <img align=left v-bind:src="project.imageUrl">
           </img>
           <h1>{{project.title}}</h1>
           <p>Team Leader: {{project.owner}}<p>
@@ -46,8 +45,7 @@
         <h2>My Ideas</h2>
         <div v-if="showSpinner" class="spinnerBox" id="ideaSpinnerBox"></div>
         <div v-for="idea in myIdeas" class="projectbox">
-          <img align=left width=40px height=40px
-               src="http://www.gravatar.com/avatar/4b3be63a4c2a439b013787725dfce802?d=identicon">
+          <img align=left width=40px height=40px v-bind:src="idea.imageUrl">
           </img>
           <p>{{idea.title}}</p>
         </div>
@@ -58,6 +56,17 @@
 </div>
 <script>
 Vue.config.debug = true;
+var gravatar = 'http://www.gravatar.com/avatar/MD5_HASH?d=identicon';
+function addGravatars(projectArray) {
+    for (index in projectArray) {
+      if (!projectArray[index].imageUrl) {
+        var hashSrc = projectArray[index].owner + '/' + projectArray[index].title;
+        var md5 = CryptoJS.MD5(hashSrc).toString();
+        projectArray[index].imageUrl = gravatar.replace('MD5_HASH',md5);
+      }
+    }
+}
+
 var notifications = new Vue({
   el: '#notifications',
   ready: function() {
@@ -66,6 +75,7 @@ var notifications = new Vue({
     this.$http.get('/api/my_projects').then(function (response) {
       console.log(response.data);
       this.myIdeas = response.data;
+      addGravatars(this.myIdeas);
       this.showSpinner = false;
     }, function (response) {
       // error callback
@@ -75,7 +85,8 @@ var notifications = new Vue({
   data: {
     init: _onload_data,
     myIdeas: [],
-    showSpinner: true
+    showSpinner: true,
+    CryptoJS: CryptoJS
   }
 });
 
@@ -109,6 +120,7 @@ var projectdisplay = new Vue({
     var spinner = new Spinner(opts).spin(target);
     this.$http.get('/api/feed').then(function (response) {
       this.projects = response.data;
+      addGravatars(this.projects);
       this.showSpinner = false;
     }, function (response) {
       // error callback
