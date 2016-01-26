@@ -48,7 +48,7 @@ class MyProjects(object):
 
         # If the owner doesn't have any project
         if not fetch:
-            return json.dumps({})
+            return json.dumps([])
 
         # Format project details
         project_details = self.fetch_project_details(cur, fetch)
@@ -206,7 +206,7 @@ class ProjectDetails(object):
         fetch = self.cur.fetchall()
         # If there's no project
         if not fetch:
-            return json.dumps({})
+            return json.dumps([])
 
         # Fetch project details
         project_details = MyProjects(self.db).fetch_project_details(self.cur, fetch=fetch)
