@@ -1,31 +1,31 @@
+<style>
+#spinnerBox {
+  width: 200px;
+  height:200px;
+  position: relative;
+  margin: auto;
+}
+
+#spinnerBox .spinner {
+  /* important! required to overided style from spinner.js */
+  position: relative !important;
+}
+</style>
 <div class="centerbox">
   <div class="flexcenter">
     <!-- Left panel -->
     <div class="bigitem">
-      <div class="displayitem">
-        <div class="projectbox">
+      <div class="displayitem" id="projectdisplay">
+        <div v-if="showSpinner" id="spinnerBox"></div>
+        <div class="projectbox" v-for="project in projects" v-cloak>
           <img align=left
                src="http://www.gravatar.com/avatar/3b3be63a4c2a439b013787725dfce802?d=identicon">
           </img>
-          <h1>Project One</h1>
-          <p>Team Leader: gnihton<p>
-          <p>
-            My idea is to create a social network where users can only post one word statuses.
-            This is actually a great idea and we are estimating a $1 billion valuation.
-          </p>
+          <h1>{{project.title}}</h1>
+          <p>Team Leader: {{project.owner}}<p>
+          <p>{{project.short_desc}}</p>
         </div>
-        <div class="projectbox">
-          <img align=left
-               src="http://www.gravatar.com/avatar/4b3be63a4c2a439b013787725dfce802?d=identicon">
-          </img>
-          <h1>Project Two</h1>
-          <p>Team Leader: aBannaSlug<p>
-          <p>
-            My idea is also to create a social network where users can only post one word statuses.
-            This project will be more successful than the one above.
-            This is actually a great idea and we are estimating a $2 billion valuation.
-          </p>
-        </div>
+        <p v-if="projects.length == 0 && ! showSpinner">No Projects found<p>
         <div style="height:0px;">
           <span class="footer">
             <a href="#">About</a>
@@ -63,5 +63,48 @@
 var notifications = new Vue({
   el: '#notifications',
   data: _onload_data
+});
+
+var opts = {
+  lines: 13 // The number of lines to draw
+, length: 28 // The length of each line
+, width: 14 // The line thickness
+, radius: 42 // The radius of the inner circle
+, scale: .3 // Scales overall size of the spinner
+, corners: 1 // Corner roundness (0..1)
+, color: '#000' // #rgb or #rrggbb or array of colors
+, opacity: 0.25 // Opacity of the lines
+, rotate: 0 // The rotation offset
+, direction: 1 // 1: clockwise, -1: counterclockwise
+, speed: 1 // Rounds per second
+, trail: 60 // Afterglow percentage
+, fps: 20 // Frames per second when using setTimeout() as a fallback for CSS
+, zIndex: 2e9 // The z-index (defaults to 2000000000)
+, className: 'spinner' // The CSS class to assign to the spinner
+, top: '50%' // Top position relative to parent
+, left: '50%' // Left position relative to parent
+, shadow: false // Whether to render a shadow
+, hwaccel: false // Whether to use hardware acceleration
+, position: 'absolute' // Element positioning
+}
+
+var projectdisplay = new Vue({
+  el: '#projectdisplay',
+  ready: function() {
+    var target = document.getElementById('spinnerBox')
+    var spinner = new Spinner(opts).spin(target);
+    this.$http.get('/api/feed').then(function (response) {
+      this.projects = response.data;
+      console.log(response.data);
+      this.showSpinner = false;
+    }, function (response) {
+      // error callback
+      this.showSpinner = false;
+    });
+  },
+  data: {
+    projects: [],
+    showSpinner: true
+  }
 });
 </script>
