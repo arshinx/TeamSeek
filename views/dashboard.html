@@ -10,13 +10,18 @@
   /* important! required to overided style from spinner.js */
   position: relative !important;
 }
+
+#create-project {
+  float: right;
+  color: #1D90FF;
+}
 </style>
 <div class="centerbox">
   <div class="flexcenter">
     <!-- Left panel -->
     <div class="bigitem">
       <div class="displayitem" id="projectdisplay">
-        <h2>Projects</h2>
+        <h2>Projects<a href="/create" id="create-project">Publish New Idea</a></h2>
         <div v-if="showSpinner" class="spinnerBox" id="spinnerBox"></div>
         <div class="projectbox" v-for="project in projects" v-cloak>
           <img align=left v-bind:src="project.imageUrl">
@@ -47,7 +52,7 @@
         <div v-for="idea in myIdeas" class="projectbox">
           <img align=left width=40px height=40px v-bind:src="idea.imageUrl">
           </img>
-          <p>{{idea.title}}</p>
+          <p><a href="{{init.user}}/{{idea.title}}">{{idea.title}}</a></p>
         </div>
         <p v-if="myIdeas.length == 0 && ! showSpinner">None found<p>
       </div>

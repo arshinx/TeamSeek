@@ -67,9 +67,25 @@ class PageCache:
 
 cache = PageCache()
 
+def createPage(session):
+    initial_data = {'user':session.get('user')}
+    return cache.get('layout').render({
+        'page_body':cache.getRaw('create'),
+        'account_url': '/api/auth/logout',
+        'account_action': 'Log Out',
+        'initial_data':json.dumps(initial_data)
+    })
+
+
+pages = {
+    "create": createPage
+}
+
 def render(path, params, session):
     if len(path) == 1:
-        # format /username
+        # format /pagename
+        if path[0] in pages:
+            return pages[path[0]](session)
         initial_data = {"user":path[0]}
         return cache.get('layout').render({
             'page_body':cache.getRaw('user'),
