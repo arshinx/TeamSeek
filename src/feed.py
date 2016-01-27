@@ -37,13 +37,14 @@ class ProjectFeeds(object):
 
         query = """
                 SELECT  project_info.project_id, title, owner, short_desc, last_edit, posted_date,
-                        update, git_link, skill, member
+                        array_agg(update), array_agg(git_link), array_agg(skill), array_agg(member)
                 FROM    project_skills
                 LEFT JOIN project_extras ON (project_extras.project_id = project_skills.project_id)
                 LEFT JOIN project_info ON (project_info.project_id = project_skills.project_id)
                 LEFT JOIN project_members ON (project_members.project_id = project_skills.project_id)
                 WHERE   skill=ANY(SELECT skill FROM user_skills
                                 WHERE user_id=(SELECT user_id FROM users WHERE username=%s))
+                GROUP BY project_info.project_id
                 """
         self.cur.execute(query, (user, ))
         fetch = self.cur.fetchall()
@@ -51,11 +52,12 @@ class ProjectFeeds(object):
         if not fetch:
             query = """
                     SELECT  project_info.project_id, title, owner, short_desc, last_edit, posted_date,
-                            update, git_link, skill, member
+                            array_agg(update), array_agg(git_link), array_agg(skill), array_agg(member)
                     FROM    project_info
                     LEFT JOIN project_extras ON (project_extras.project_id = project_info.project_id)
                     LEFT JOIN project_skills ON (project_skills.project_id = project_info.project_id)
                     LEFT JOIN project_members ON (project_members.project_id = project_info.project_id)
+                    GROUP BY project_info.project_id
                     """
             self.cur.execute(query)
             fetch = self.cur.fetchall()
