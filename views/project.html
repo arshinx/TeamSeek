@@ -1,3 +1,8 @@
+<style>
+.markdown {
+  margin-top: 28px;
+}
+</style>
 <div class="centerbox">
   <div class="flexcenter">
     <!-- Left panel -->
@@ -13,7 +18,9 @@
             </img>
             <h1>{{remote.title}}</h1>
             <p>Team Leader: {{remote.owner}}<p>
-            <p>{{remote.long_desc}}</p>
+            <div class="markdown">
+              <div v-html="remote.long_desc | marked"></div>
+            </div>
           </div>
         </div>
         <div style="height:0px;">
@@ -42,6 +49,7 @@
     </div>
   </div>
 </div>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script>
 <script>
 var gravatar = 'http://www.gravatar.com/avatar/MD5_HASH?d=identicon';
 function getGravatar(hashItem) {
@@ -69,9 +77,8 @@ var projectbox = new Vue({
         this.imageUrl = getGravatar(_onload_data.user + '/' + _onload_data.title);
         users = [];
         if (response.data.project_members) {
-          if (typeof response.data.project_members == 'string') {
-            response.data.project_members = [response.data.project_members];
-          }
+          // Display project owner as first member
+          response.data.project_members.unshift(response.data.owner);
           for (index in response.data.project_members) {
             var user = response.data.project_members[index];
             users.push({name: user, imageUrl: getGravatar(user)});
@@ -84,9 +91,12 @@ var projectbox = new Vue({
       console.log('failure');
     });
   },
+  filters: {
+    marked: marked
+  },
   data: {
     noneFound: false,
-    remote: {},
+    remote: {long_desc:''},
     imageUrl: ''
   }
 });
