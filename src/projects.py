@@ -129,7 +129,7 @@ class ProjectDetails(object):
         # Getting project details
         query = """
                 SELECT  project_info.project_id, title, owner, short_desc, last_edit, posted_date,
-                        update, git_link, skill, member
+                        update, git_link, skill, member, long_desc
                 FROM    project_info
                 LEFT JOIN project_extras ON (project_extras.project_id = project_info.project_id)
                 LEFT JOIN project_skills ON (project_skills.project_id = project_info.project_id)
@@ -140,10 +140,12 @@ class ProjectDetails(object):
         fetch = self.cur.fetchall()
         # If there's no project
         if not fetch:
-            return json.dumps([])
+            return json.dumps({"error":"Project not found"})
 
         # Fetch project details
-        project_details = MyProjects(self.db).format_project_details(self.cur, fetch=fetch)
+        project_details = MyProjects(self.db).format_project_details(self.cur, fetch=fetch)[0]
+        # Add long_desc to result from format_project_details
+        project_details['long_desc'] = fetch[0][10]
         return json.dumps(project_details, indent=4)
 
     """ Handling POST request """
