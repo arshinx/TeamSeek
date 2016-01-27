@@ -36,28 +36,26 @@ class ProjectFeeds(object):
         user = cherrypy.session['user']
 
         query = """
-                SELECT  project_info.project_id, title, owner, short_desc, last_edit, posted_date,
-                        array_agg(update), array_agg(git_link), array_agg(skill), array_agg(member)
-                FROM    project_skills
-                LEFT JOIN project_extras ON (project_extras.project_id = project_skills.project_id)
-                LEFT JOIN project_info ON (project_info.project_id = project_skills.project_id)
-                LEFT JOIN project_members ON (project_members.project_id = project_skills.project_id)
-                WHERE   skill=ANY(SELECT skill FROM user_skills
+                SELECT	project_info.project_id, title, owner, short_desc, last_edit, posted_date,
+                        (SELECT update FROM project_extras WHERE project_id=project_info.project_id),
+                        (SELECT git_link FROM project_extras WHERE project_id=project_info.project_id),
+                        array(SELECT skill FROM project_skills WHERE project_id=project_info.project_id),
+                        array(SELECT member FROM project_members WHERE project_id=project_info.project_id)
+                FROM    project_info, project_skills
+                WHERE   project_skills.skill=ANY(SELECT skill FROM user_skills
                                 WHERE user_id=(SELECT user_id FROM users WHERE username=%s))
-                GROUP BY project_info.project_id
                 """
         self.cur.execute(query, (user, ))
         fetch = self.cur.fetchall()
 
         if not fetch:
             query = """
-                    SELECT  project_info.project_id, title, owner, short_desc, last_edit, posted_date,
-                            array_agg(update), array_agg(git_link), array_agg(skill), array_agg(member)
+                    SELECT	project_id, title, owner, short_desc, last_edit, posted_date,
+                            (SELECT update FROM project_extras WHERE project_id=project_info.project_id),
+                            (SELECT git_link FROM project_extras WHERE project_id=project_info.project_id),
+                            array(SELECT skill FROM project_skills WHERE project_id=project_info.project_id),
+                            array(SELECT member FROM project_members WHERE project_id=project_info.project_id)
                     FROM    project_info
-                    LEFT JOIN project_extras ON (project_extras.project_id = project_info.project_id)
-                    LEFT JOIN project_skills ON (project_skills.project_id = project_info.project_id)
-                    LEFT JOIN project_members ON (project_members.project_id = project_info.project_id)
-                    GROUP BY project_info.project_id
                     """
             self.cur.execute(query)
             fetch = self.cur.fetchall()

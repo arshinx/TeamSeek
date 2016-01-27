@@ -39,14 +39,13 @@ class MyProjects(object):
 
         # Getting owner's projects
         query = """
-                SELECT  project_info.project_id, title, owner, short_desc, last_edit, posted_date,
-                        array_agg(update), array_agg(git_link), array_agg(skill), array_agg(member)
+                SELECT	project_id, title, owner, short_desc, last_edit, posted_date,
+                        (SELECT update FROM project_extras WHERE project_id=project_info.project_id),
+                        (SELECT git_link FROM project_extras WHERE project_id=project_info.project_id),
+                        array(SELECT skill FROM project_skills WHERE project_id=project_info.project_id),
+                        array(SELECT member FROM project_members WHERE project_id=project_info.project_id)
                 FROM    project_info
-                LEFT JOIN project_extras ON (project_extras.project_id = project_info.project_id)
-                LEFT JOIN project_skills ON (project_skills.project_id = project_info.project_id)
-                LEFT JOIN project_members ON project_members.project_id = project_info.project_id
                 WHERE   owner = %s
-                GROUP BY project_info.project_id
                 """
         cur.execute(query, (owner, ))     # Prevent SQL injection
         fetch = cur.fetchall()
@@ -85,10 +84,10 @@ class MyProjects(object):
                     'short_desc': project[3],
                     'last_edit': str(project[4]),
                     'posted_date': str(project[5]),
-                    'update': project[6][0],
-                    'git_link': project[7][0],
-                    'project_skills': [] if not project[8][0] else list(set(project[8])),
-                    'project_members': [] if not project[9][0] else list(set(project[9]))
+                    'update': project[6],
+                    'git_link': project[7],
+                    'project_skills': project[8],
+                    'project_members': project[9]
                     }
             # Adding the project's details into the list
             project_list.append(dict)
@@ -129,14 +128,13 @@ class ProjectDetails(object):
 
         # Getting project details
         query = """
-                SELECT  project_info.project_id, title, owner, short_desc, last_edit, posted_date,
-                        array_agg(update), array_agg(git_link), array_agg(skill), array_agg(member), long_desc
+                SELECT	project_id, title, owner, short_desc, last_edit, posted_date,
+                        (SELECT update FROM project_extras WHERE project_id=project_info.project_id),
+                        (SELECT git_link FROM project_extras WHERE project_id=project_info.project_id),
+                        array(SELECT skill FROM project_skills WHERE project_id=project_info.project_id),
+                        array(SELECT member FROM project_members WHERE project_id=project_info.project_id), long_desc
                 FROM    project_info
-                LEFT JOIN project_extras ON (project_extras.project_id = project_info.project_id)
-                LEFT JOIN project_skills ON (project_skills.project_id = project_info.project_id)
-                LEFT JOIN project_members ON (project_members.project_id = project_info.project_id)
-                WHERE   owner=%s AND title=%s
-                GROUP BY project_info.project_id
+                WHERE   owner = %s AND title=%s
                 """
         self.cur.execute(query, (params['user'], params['title'], ))     # Prevent SQL injection
         fetch = self.cur.fetchall()
