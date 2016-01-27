@@ -15,10 +15,10 @@ class WebRoutes(object):
             #   {'action': 'see edit_project.py', 'project_id': '', 'data': 'what need to change'}
             self.edit_project = edit_project.Page(db)
 
-            # mount /api/my_projects/ page
+            # mount /api/projects/ page
             # receiving GET only
-            # require: cherrypy.session['user']
-            self.my_projects = projects.MyProjects(db)
+            # require: username (to pull projects specifically for a user)
+            self.projects = projects.MyProjects(db)
 
             # mount /api/feed/ page
             # require: cherrypy.session['user']
