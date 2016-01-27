@@ -3,32 +3,18 @@
     <!-- Left panel -->
     <div class="bigitem">
       <div class="displayitem">
-        <div class="projectbox">
-          <img align=left
-               src="http://www.gravatar.com/avatar/3b3be63a4c2a439b013787725dfce802?d=identicon">
-          </img>
-          <h1>ProjectCool</h1>
-          <p>Team Leader: niavarga<p>
-          <p>
-            My idea is to create a social network where users can only post one word statuses.
-            This is actually a great idea and we are estimating a $1 billion valuation.
-          </p>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
-            irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-            nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
-            qui officia deserunt mollit anim id est laborum.
-          </p>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
-            irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-            nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
-            qui officia deserunt mollit anim id est laborum.
-          </p>
+        <div class="projectbox" id="projectbox">
+          <div v-if="noneFound">
+            <h1>Project Not Found!</h1>
+            <a href="/">return home</a>
+          </div>
+          <div v-else v-cloak>
+            <img align=left v-bind:src="imageUrl">
+            </img>
+            <h1>{{remote.title}}</h1>
+            <p>Team Leader: {{remote.owner}}<p>
+            <p>{{remote.long_desc}}</p>
+          </div>
         </div>
         <div style="height:0px;">
           <span class="footer">
@@ -45,21 +31,63 @@
         <h2>Notifications</h2>
         <p><i>No new notifications</i></p>
       </div>
-      <div class="displayitem">
+      <div class="displayitem" id="members">
         <h2>Members</h2>
-        <div class="projectbox">
-          <img align=left width=40px height=40px
-               src="http://www.gravatar.com/avatar/2b3be63a4c2a439b013787725dfce802?d=identicon">
+        <div class="projectbox" v-for="member in memberArray">
+          <img align=left width=40px height=40px v-bind:src="member.imageUrl">
           </img>
-          <p>Nicholas Vargas</p>
-        </div>
-        <div class="projectbox">
-          <img align=left width=40px height=40px
-               src="http://www.gravatar.com/avatar/5b3be63a4c2a439b013787725dfce802?d=identicon">
-          </img>
-          <p>George Washington</p>
+          <p><a href="/{{member.name}}">{{member.name}}</a></p>
         </div>
       </div>
     </div>
   </div>
 </div>
+<script>
+var gravatar = 'http://www.gravatar.com/avatar/MD5_HASH?d=identicon';
+function getGravatar(hashItem) {
+  var md5 = CryptoJS.MD5(hashItem).toString();
+  return gravatar.replace('MD5_HASH',md5);
+}
+
+var members = new Vue({
+  el: '#members',
+  methods: {
+  },
+  data: {
+    memberArray: []
+  }
+});
+
+var projectbox = new Vue({
+  el: '#projectbox',
+  ready: function() {
+    this.$http.get('/api/project_details', {user:_onload_data.user, title:_onload_data.title}).then(function(response) {
+      console.log(response.data);
+      if (!response.data || response.data.error) {
+        this.noneFound = true;
+      } else {
+        this.imageUrl = getGravatar(_onload_data.user + '/' + _onload_data.title);
+        users = [];
+        if (response.data.project_members) {
+          if (typeof response.data.project_members == 'string') {
+            response.data.project_members = [response.data.project_members];
+          }
+          for (index in response.data.project_members) {
+            var user = response.data.project_members[index];
+            users.push({name: user, imageUrl: getGravatar(user)});
+          }
+        }
+        members.memberArray = users;
+        this.remote = response.data;
+      }
+    }, function() {
+      console.log('failure');
+    });
+  },
+  data: {
+    noneFound: false,
+    remote: {},
+    imageUrl: ''
+  }
+});
+</script>

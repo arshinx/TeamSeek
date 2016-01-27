@@ -68,8 +68,26 @@ class PageCache:
 cache = PageCache()
 
 def render(path, params, session):
-    if len(path) != 0:
-        return "Page not mapped"
+    if len(path) == 1:
+        # format /username
+        initial_data = {"user":path[0]}
+        return cache.get('layout').render({
+            'page_body':cache.getRaw('user'),
+            'account_url': '/api/auth/logout',
+            'account_action': 'Log Out',
+            'initial_data':json.dumps(initial_data)
+        })
+    elif len(path) == 2:
+        # format /username/projectname
+        initial_data = {"user":path[0], "title":path[1]}
+        return cache.get('layout').render({
+            'page_body':cache.getRaw('project'),
+            'account_url': '/api/auth/logout',
+            'account_action': 'Log Out',
+            'initial_data':json.dumps(initial_data)
+        })
+    elif len(path) > 2:
+        return "Unrecognized url"
     if 'user' not in session:
         # If session info does not exist render the welcome page
         return cache.get('layout').render({

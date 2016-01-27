@@ -21,7 +21,7 @@
         <div class="projectbox" v-for="project in projects" v-cloak>
           <img align=left v-bind:src="project.imageUrl">
           </img>
-          <h1>{{project.title}}</h1>
+          <h1><a href="/{{project.owner}}/{{project.title}}">{{project.title}}</a></h1>
           <p>Team Leader: {{project.owner}}<p>
           <p>{{project.short_desc}}</p>
         </div>
