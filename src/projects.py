@@ -17,15 +17,18 @@ class MyProjects(object):
             print "projects.py >> Error: Database connection invalid!"
 
     @cherrypy.expose
-    def index(self):
+    def index(self, **params):
         """ Forwarding to Request handlers below """
         # Is user provided Something is fishy if it's not provided
         if 'user' not in cherrypy.session:
             return json.dumps({'error':"You shouldn't be here"})
 
+        # If "owner" param is defined, use that instead
+        targetUser = params['owner'] if 'owner' in params else cherrypy.session['user']
+
         # Forwarding HTTP requests
         http_method = getattr(self, cherrypy.request.method)
-        return http_method(cherrypy.session['user'])
+        return http_method(targetUser)
 
     """ Handling GET requests """
     @cherrypy.tools.accept(media='text/plain')
