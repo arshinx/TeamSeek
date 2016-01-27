@@ -2,10 +2,16 @@
   <div class="flexcenter">
     <!-- Left panel -->
     <div class="bigitem">
-      <div class="displayitem">
-        <div class="projectbox" id="projectbox">
-          <p>Not yet complete</p>
+      <div class="displayitem" id="projectdisplay">
+        <h2>Projects from {{user}}</h2>
+        <div v-if="showSpinner" class="spinnerBox" id="spinnerBox"></div>
+        <div class="projectbox" v-for="project in projects" v-cloak>
+          <img align=left v-bind:src="project.imageUrl">
+          </img>
+          <h1><a href="/{{project.owner}}/{{project.title}}">{{project.title}}</a></h1>
+          <p>{{project.short_desc}}</p>
         </div>
+        <p v-if="projects.length == 0 && ! showSpinner">No projects found<p>
         <div style="height:0px;">
           <span class="footer">
             <a href="#">About</a>
@@ -24,3 +30,35 @@
     </div>
   </div>
 </div>
+<script>
+var gravatar = 'http://www.gravatar.com/avatar/MD5_HASH?d=identicon';
+function addGravatars(projectArray) {
+    for (index in projectArray) {
+      if (!projectArray[index].imageUrl) {
+        var hashSrc = projectArray[index].owner + '/' + projectArray[index].title;
+        var md5 = CryptoJS.MD5(hashSrc).toString();
+        projectArray[index].imageUrl = gravatar.replace('MD5_HASH',md5);
+      }
+    }
+}
+
+var projectdisplay = new Vue({
+  el: '#projectdisplay',
+  ready: function() {
+    this.$http.get('/api/my_projects', {owner:_onload_data.user}).then(function (response) {
+      this.projects = response.data;
+      addGravatars(this.projects);
+      this.showSpinner = false;
+    }, function (response) {
+      // error callback
+      this.showSpinner = false;
+    });
+  },
+  data: {
+    projects: [],
+    myIdeas: [],
+    user: _onload_data.user,
+    showSpinner: true
+  }
+});
+</script>

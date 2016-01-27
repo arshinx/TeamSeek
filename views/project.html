@@ -17,7 +17,7 @@
             <img align=left v-bind:src="imageUrl">
             </img>
             <h1>{{remote.title}}</h1>
-            <p>Team Leader: {{remote.owner}}<p>
+            <p>Team Leader: <a href="/{{teamLeader}}">{{remote.owner}}</a><p>
             <div class="markdown">
               <div v-html="remote.long_desc | marked"></div>
             </div>
@@ -85,6 +85,7 @@ var projectbox = new Vue({
           }
         }
         members.memberArray = users;
+        this.teamLeader = response.data.owner;
         this.remote = response.data;
       }
     }, function() {
@@ -96,7 +97,8 @@ var projectbox = new Vue({
   },
   data: {
     noneFound: false,
-    remote: {long_desc:''},
+    remote: {long_desc:'', owner:''},
+    teamLeader: '',
     imageUrl: ''
   }
 });

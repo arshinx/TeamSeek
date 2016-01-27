@@ -26,9 +26,9 @@
         <div class="projectbox" v-for="project in projects" v-cloak>
           <img align=left v-bind:src="project.imageUrl">
           </img>
-          <h1><a href="/{{project.owner}}/{{project.title}}">{{project.title}}</a></h1>
-          <p>Team Leader: {{project.owner}}<p>
-          <p>{{project.short_desc}}</p>
+          <h2><a href="/{{project.owner}}/{{project.title}}">{{project.owner}}/{{project.title}}</a></h2>
+          <p v-if="project.short_desc">{{project.short_desc}}</p>
+          <p v-else><i>No description found</i></p>
         </div>
         <p v-if="projects.length == 0 && ! showSpinner">No projects found<p>
         <div style="height:0px;">
@@ -47,7 +47,7 @@
         <p><i>Welcome back, {{init.user}}.</i></p>
       </div>
       <div class="displayitem">
-        <h2>My Ideas</h2>
+        <h2><a href="/{{init.user}}">My Ideas</a></h2>
         <div v-if="showSpinner" class="spinnerBox" id="ideaSpinnerBox"></div>
         <div v-for="idea in myIdeas" class="projectbox">
           <img align=left width=40px height=40px v-bind:src="idea.imageUrl">
