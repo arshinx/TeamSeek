@@ -9,7 +9,6 @@ CREATE TABLE user_extras (
 	user_id INT PRIMARY KEY,
 	first_name VARCHAR,
 	last_name VARCHAR,
-	gender VARCHAR,
 	bio TEXT,
 	avatar VARCHAR
 	);
