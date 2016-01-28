@@ -77,7 +77,7 @@ var notifications = new Vue({
   ready: function() {
     var target = document.getElementById('ideaSpinnerBox')
     var spinner = new Spinner(opts).spin(target);
-    this.$http.get('/api/my_projects').then(function (response) {
+    this.$http.get('/api/projects').then(function (response) {
       console.log(response.data);
       this.myIdeas = response.data;
       addGravatars(this.myIdeas);
