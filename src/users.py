@@ -78,6 +78,77 @@ class QualifiedUsers(object):
         """ Not supported """
         return json.dumps({"error": "DELETE request is not supported"})
 
+""" This class handles the page /api/users/ """
+class UserDetails(object):
+    """ Pulling user's details for user profile page """
+
+    def __init__(self, db=None):
+        """ Setting up class's variables """
+        # set database for this class
+        if db:
+            self.db = db
+            self.cur = db.connection.cursor()
+        else:
+            print ""
+
+    """ Forwarding HTTP requests """
+    @cherrypy.expose
+    def index(self, **params):
+        """ Forward HTTP requests to the right handler """
+        # Make sure user is logged in
+        if 'user' not in cherrypy.session:
+            return json.dumps({"error": "You shouldn't be here"})
+        # Catch HTTP method, and start handling
+        http_method = getattr(self, cherrypy.request.method)
+        return http_method(**params)
+
+    """ GET request handler """
+    @cherrypy.tools.accept(media='text/plain')
+    def GET(self, **params):
+        """
+        Pull user's details from database
+
+        :param params: username
+        :return: user's detail dictionary (full)
+        """
+        # Check if username is provided
+        if 'username' not in params:
+            return json.dumps({"error": "Not enough data"})
+        # Fetch user's details based on username
+        query = """
+                SELECT  users.user_id, username, email, join_date,
+                        (SELECT first_name FROM user_extras WHERE user_id = users.user_id),
+                        (SELECT last_name FROM user_extras WHERE user_id = users.user_id),
+                        (SELECT bio FROM user_extras WHERE user_id = users.user_id),
+                        (SELECT avatar FROM user_extras WHERE user_id = users.user_id),
+                        array(SELECT skill FROM user_skills WHERE user_skills.user_id = users.user_id)
+                FROM users
+                WHERE username = %s
+                """
+        self.cur.execute(query, (params['username'], ))
+        # Grab data returned from database
+        fetch = self.cur.fetchall()
+        # If there's no user detail, return a blank dictionary
+        if not fetch:
+            return json.dumps({})
+        # Get a list of user details from fetch
+        user_details = format_user_details(full=True, fetch=fetch)
+        # Returning a dictionary only
+        # because username is unique
+        return json.dumps(user_details[0])
+
+    """ POST request handler """
+    def POST(self):
+        return json.dumps({"error": "POST request is not supported"})
+
+    """ PUT request handler """
+    def PUT(self):
+        return json.dumps({"error": "PUT request is not supported"})
+
+    """ DELETE request handler """
+    def DELETE(self):
+        return json.dumps({"error": "DELETE request is not supported"})
+
 """ Formating user_details """
 def format_user_details(full=False, fetch=None):
     """

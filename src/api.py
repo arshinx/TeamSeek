@@ -35,6 +35,12 @@ class WebRoutes(object):
             #   project_id
             self.qualified_users = users.QualifiedUsers(db)
 
+            # mount /api/users/ page
+            # require:
+            #   cherrpy.session['user']
+            #   username
+            self.users = users.UserDetails(db)
+
             # mount /api/auth/ page
             # maps /api/auth/github and /api/auth/debug
             self.auth = auth.WebRoutes()
