@@ -67,7 +67,7 @@ class PageCache:
 
 cache = PageCache()
 
-def createPage(session):
+def createPage(session, params):
     initial_data = {'user':session.get('user')}
     return cache.get('layout').render({
         'page_body':cache.getRaw('create'),
@@ -85,7 +85,7 @@ def render(path, params, session):
     if len(path) == 1:
         # format /pagename
         if path[0] in pages:
-            return pages[path[0]](session)
+            return pages[path[0]](session, params)
         initial_data = {"user":path[0]}
         return cache.get('layout').render({
             'page_body':cache.getRaw('user'),
@@ -95,7 +95,8 @@ def render(path, params, session):
         })
     elif len(path) == 2:
         # format /username/projectname
-        initial_data = {"user":path[0], "title":path[1]}
+        isOwnProject = path[0] == session.get('user')
+        initial_data = {"user":path[0], "title":path[1], "isOwnProject":isOwnProject}
         return cache.get('layout').render({
             'page_body':cache.getRaw('project'),
             'account_url': '/api/auth/logout',
