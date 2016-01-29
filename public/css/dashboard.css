@@ -19,6 +19,10 @@ a {
   text-decoration: none;
  }
 
+a:hover {
+  color:#1D90FF;
+ }
+
 .projectbox {
   display: block;
   color: black;
@@ -162,6 +166,10 @@ a {
 .branding {
   font-family:  "Comfortaa", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: 900;
+}
+
+.branding a:hover {
+  color: inherit;
 }
 
 #menu {
