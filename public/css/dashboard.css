@@ -29,6 +29,18 @@ a {
   font-weight: lighter;
 }
 
+.spinnerBox {
+  width: 200px;
+  height:200px;
+  position: relative;
+  margin: auto;
+}
+
+.spinnerBox .spinner {
+  /* important! required to overided style from spinner.js */
+  position: relative !important;
+}
+
 .displayitem {
   background-color: white;
   display:  block;
