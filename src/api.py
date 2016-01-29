@@ -4,6 +4,7 @@ import edit_project
 import projects
 import auth
 import feed
+import suggestions
 import users
 
 class WebRoutes(object):
@@ -33,13 +34,13 @@ class WebRoutes(object):
             # require:
             #   cherrypy.session['user']
             #   project_id
-            self.qualified_users = users.QualifiedUsers(db)
+            self.qualified_users = suggestions.QualifiedUsers(db)
 
             # mount /api/users/ page
             # require:
             #   cherrpy.session['user']
             #   username
-            self.users = users.UserDetails(db)
+            self.users = users.UserHandler(db)
 
             # mount /api/auth/ page
             # maps /api/auth/github and /api/auth/debug
