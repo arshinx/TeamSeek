@@ -45,7 +45,7 @@ function addGravatars(projectArray) {
 var projectdisplay = new Vue({
   el: '#projectdisplay',
   ready: function() {
-    this.$http.get('/api/projects', {action: 'my_project', owner:_onload_data.user}).then(function (response) {
+    this.$http.get('/api/projects', {action: 'my_projects', owner:_onload_data.user}).then(function (response) {
       this.projects = response.data;
       addGravatars(this.projects);
       this.showSpinner = false;

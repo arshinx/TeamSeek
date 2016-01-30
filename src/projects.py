@@ -92,8 +92,8 @@ class ProjectHandler(object):
 
         # If fetching a particular project details
         if 'project_details' == params['action']:
-            query += "AND title = %s"
-            self.cur.execute(query, (user, params['title'], ))
+            query += " AND title = %s"
+            self.cur.execute(query, (params['user'], params['title'], ))
             full = True
 
         # Get the data from database
@@ -106,7 +106,7 @@ class ProjectHandler(object):
         # Format project details
         project_details = format_project_details(full=full, cur=self.cur, fetch=fetch)
 
-        print json.dumps(project_details, indent=4)  # for debugging
+        # print json.dumps(project_details, indent=4)  # for debugging
         return json.dumps(project_details, indent=4)   # for returning on webpage
 
     """ [POST] request handler """

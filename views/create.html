@@ -122,7 +122,7 @@ new Vue({
       this.project_id = getParameterByName('project_id');
       this.owner = getParameterByName('owner');
       this.inputTitle = getParameterByName('title');
-      this.$http.get('/api/project_details', {user:this.owner, title:this.inputTitle}).then(function(response) {
+      this.$http.get('/api/projects', {action: 'project_details', user:this.owner, title:this.inputTitle}).then(function(response) {
         /* Set previously defined attributes */
         var data = response.data;
         this.shorDesc = data.short_desc || '';
@@ -145,9 +145,9 @@ new Vue({
       /* Upload short_desc and long_desc */
       var emulateJSON = {emulateJSON:true};
       var short_desc = {action:'edit_short_desc', project_id:project_id, data:this.shorDesc};
-      this.$http.put('/api/edit_project/', short_desc, emulateJSON).then(function(response) {
+      this.$http.post('/api/projects/', short_desc, emulateJSON).then(function(response) {
         var long_desc = {action:'edit_long_desc', project_id:project_id, data:this.input};
-        this.$http.put('/api/edit_project/', long_desc, emulateJSON).then(function(response) {
+        this.$http.post('/api/projects/', long_desc, emulateJSON).then(function(response) {
           if (callback) callback();
         }, function() {});
       }, function() {});
@@ -164,7 +164,7 @@ new Vue({
         });
       } else {
         /* Project does not yet exist and needs to be created */
-        this.$http.put('/api/edit_project/', new_project, emulateJSON).then(function(response) {
+        this.$http.post('/api/projects/', new_project, emulateJSON).then(function(response) {
           this.saveFields(response.data.project_id, function() {
             document.location = projectPage;
           });

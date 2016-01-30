@@ -50,7 +50,6 @@ class ProjectFeeds(object):
                 """
         self.cur.execute(query, (cherrypy.session['user'], ))
         fetch = self.cur.fetchall()
-        print fetch
 
         if not fetch:
             query = """

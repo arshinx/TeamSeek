@@ -77,10 +77,11 @@ var members = new Vue({
 var projectbox = new Vue({
   el: '#projectbox',
   ready: function() {
-    this.$http.get('/api/project_details', {user:_onload_data.user, title:_onload_data.title}).then(function(response) {
+    this.$http.get('/api/projects', {action: 'project_details', user:_onload_data.user, title:_onload_data.title}).then(function(response) {
       if (!response.data || response.data.error) {
         this.noneFound = true;
       } else {
+        response.data = response.data[0]
         this.imageUrl = getGravatar(_onload_data.user + '/' + _onload_data.title);
         users = [];
         if (response.data.project_members) {
