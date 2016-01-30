@@ -5,6 +5,7 @@ import auth
 import feed
 import suggestions
 import users
+import skills
 
 class WebRoutes(object):
     def __init__(self, db=None):
@@ -28,6 +29,9 @@ class WebRoutes(object):
             # require:
             #   Look into [GET], [POST], [PUT], [DELETE] methods
             self.users = users.UserHandler(db)
+
+            # mount /api/skills/ page
+            self.skills = skills.SkillHandler(db)
 
             # mount /api/auth/ page
             # maps /api/auth/github and /api/auth/debug
