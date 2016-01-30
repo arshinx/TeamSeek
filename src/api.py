@@ -1,6 +1,5 @@
 import cherrypy
 import json
-import edit_project
 import projects
 import auth
 import feed
