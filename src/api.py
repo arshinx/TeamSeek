@@ -10,25 +10,14 @@ import users
 class WebRoutes(object):
     def __init__(self, db=None):
         if db:
-            # mount /api/edit_project/ page
-            # receiving PUT request only
-            # require:
-            #   cherrpy.session['user']
-            #   {'action': 'see edit_project.py', 'project_id': '', 'data': 'what need to change'}
-            self.edit_project = edit_project.Page(db)
-
             # mount /api/projects/ page
             # receiving GET only
-            # require: username (to pull projects specifically for a user)
-            self.projects = projects.MyProjects(db)
+            # require: go to file projects to see requirements
+            self.projects = projects.ProjectHandler(db)
 
             # mount /api/feed/ page
             # require: cherrypy.session['user']
             self.feed = feed.ProjectFeeds(db)
-
-            # mount /api/project_details/ page
-            # require: user, title
-            self.project_details = projects.ProjectDetails(db)
 
             # mount /api/qualified_users/ page
             # require:
@@ -38,8 +27,7 @@ class WebRoutes(object):
 
             # mount /api/users/ page
             # require:
-            #   cherrpy.session['user']
-            #   username
+            #   Look into [GET], [POST], [PUT], [DELETE] methods
             self.users = users.UserHandler(db)
 
             # mount /api/auth/ page
