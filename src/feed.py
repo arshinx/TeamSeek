@@ -1,9 +1,14 @@
+""" This file handles anything related to feeds
+    be it algorithm or feed suggestions.
+
+    Accessed from /api/feed/
+"""
+
 import cherrypy
 import json
-from projects import MyProjects
+import projects
 
-""" This class handles getting Project Feeds for Dashboard """
-""" Access using /api/feed/ """
+
 class ProjectFeeds(object):
 
     """ This handles getting database connection """
@@ -32,21 +37,20 @@ class ProjectFeeds(object):
         """
         :return: JSON format of projects
         """
-        # Getting user
-        user = cherrypy.session['user']
-
         query = """
                 SELECT	project_info.project_id, title, owner, short_desc, last_edit, posted_date,
                         (SELECT update FROM project_extras WHERE project_id=project_info.project_id),
                         (SELECT git_link FROM project_extras WHERE project_id=project_info.project_id),
                         array(SELECT skill FROM project_skills WHERE project_id=project_info.project_id),
                         array(SELECT member FROM project_members WHERE project_id=project_info.project_id)
-                FROM    project_info, project_skills
-                WHERE   project_skills.skill=ANY(SELECT skill FROM user_skills
-                                WHERE user_id=(SELECT user_id FROM users WHERE username=%s))
+                FROM    project_info
+                WHERE   project_id = ANY (SELECT project_id FROM project_skills WHERE skill =ANY
+                                            (SELECT skill FROM user_skills WHERE user_id =
+                                                (SELECT user_id FROM users WHERE username = %s)))
                 """
-        self.cur.execute(query, (user, ))
+        self.cur.execute(query, (cherrypy.session['user'], ))
         fetch = self.cur.fetchall()
+        print fetch
 
         if not fetch:
             query = """
@@ -60,9 +64,8 @@ class ProjectFeeds(object):
             self.cur.execute(query)
             fetch = self.cur.fetchall()
 
-        # Re-using projects.MyProjects().fetch_project_details(cur, fetch)
-        my_project = MyProjects(self.db)
-        project_details = my_project.format_project_details(self.cur, fetch)
+        # Reusing helper function from projects
+        project_details = projects.format_project_details(False, self.cur, fetch)
 
         return json.dumps(project_details[:10], indent=4)
 
