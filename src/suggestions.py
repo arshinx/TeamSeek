@@ -20,7 +20,6 @@ class QualifiedUsers(object):
     @cherrypy.expose
     def index(self, **params):
         """ Catching the HTTP request, and forward to the right request handler """
-        cherrypy.session['user'] = 'gnihton'
         # Check if user is logged in
         if 'user' not in cherrypy.session:
             return json.dumps({"error": "You shouldn't be here"})
