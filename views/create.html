@@ -122,9 +122,9 @@ new Vue({
       this.project_id = getParameterByName('project_id');
       this.owner = getParameterByName('owner');
       this.inputTitle = getParameterByName('title');
-      this.$http.get('/api/projects', {action: 'project_details', user:this.owner, title:this.inputTitle}).then(function(response) {
+      this.$http.get('/api/projects/', {action: 'project_details', user:this.owner, title:this.inputTitle}).then(function(response) {
         /* Set previously defined attributes */
-        var data = response.data;
+        var data = response.data[0];
         this.shorDesc = data.short_desc || '';
         this.input = data.long_desc || '';
         this.showSpinner = false;
