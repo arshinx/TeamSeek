@@ -37,6 +37,7 @@ class UserHandler(object):
     @cherrypy.expose
     def index(self, **params):
         """ Forward HTTP requests to the right handler """
+        cherrypy.session['user'] = 'gnihton'
         # Make sure that user is logged in
         if 'user' not in cherrypy.session:
             return json.dumps({"error": "You shouldn't be here"})
@@ -153,7 +154,7 @@ class UserHandler(object):
         Deleting specific user's details like skills
 
         :param params:  See _ACTION at the top of this file for list of actions
-                        i.e {'action': 'delete_skill', 'data': 'skill'}
+                        i.e {'action': 'delete_skill', 'skill': 'skill'}
         :return: {} if successful or {"error": "some error"} if failed
         """
         # Check if everything is provided
@@ -174,10 +175,11 @@ class UserHandler(object):
         # SQL injection!
         query = "DELETE FROM %s " % table
         query += "WHERE user_id = (SELECT user_id FROM users WHERE username = %s) "
-        query += "AND %s = %s" % (column, '%s')
+        query += "AND %s = %s;" % (column, '%s')
+        query += "UPDATE skills SET count = count - 1 WHERE name = %s;"
 
         # Send query to database
-        self.cur.execute(query, (cherrypy.session['user'], params['data'], ))
+        self.cur.execute(query, (cherrypy.session['user'], params['skill'], params['skill']))
 
         # Apply changes to database
         self.db.connection.commit()
@@ -250,10 +252,12 @@ def add_user_skill(cur=None, user=None, skill=None):
     if cur.fetchall():
         return json.dumps({"error": "User already has that skill"})
 
+    # Add skill into account and increase the skill's count
     query = """
             INSERT INTO user_skills (user_id, skill)
-            VALUES ((SELECT user_id FROM users WHERE username = %s), %s)
+            VALUES ((SELECT user_id FROM users WHERE username = %s), %s);
+            UPDATE skills SET count = count + 1 WHERE name = %s;
             """
-    cur.execute(query, (user, skill, ))
+    cur.execute(query, (user, skill, skill, ))
     # Do not commit in here, commit in UserHandler class
     return json.dumps({})
