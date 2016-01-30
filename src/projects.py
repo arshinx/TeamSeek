@@ -17,7 +17,7 @@ class ProjectHandler(object):
     _ACTION = {
         # [GET] Getting project's details
         'project_details': [],  # params: action, title, user
-        'my_projects': [],      # params: action
+        'my_projects': [],      # params: action, owner (optional)
         # [POST] Editing project's details
         # params: action, project_id, data
         'edit_title': ['project_info', 'title'],
@@ -64,6 +64,13 @@ class ProjectHandler(object):
             i.e {'action': 'my_projects'}
         """
         full = False
+        # Grab user that's logged on
+        user = cherrypy.session['user']
+
+        # If owner is provided
+        if 'owner' in params:
+            user = params['owner']
+
         # Check if everything is provided
         if 'action' not in params and \
            ('title' not in params or 'user' not in params):
@@ -81,12 +88,12 @@ class ProjectHandler(object):
                 WHERE owner = %s
                 """
         # Fetching the owner's project if not a particular project
-        self.cur.execute(query, (cherrypy.session['user'], ))     # Prevent SQL injection
+        self.cur.execute(query, (user, ))     # Prevent SQL injection
 
         # If fetching a particular project details
         if 'project_details' == params['action']:
             query += "AND title = %s"
-            self.cur.execute(query, (params['user'], params['title'], ))
+            self.cur.execute(query, (user, params['title'], ))
             full = True
 
         # Get the data from database
