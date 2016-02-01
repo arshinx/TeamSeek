@@ -11,7 +11,8 @@ ALLOW_DEBUG_LOGIN = True
 class WebRoutes(object):
     @cherrypy.expose
     def github(self, **params):
-        return json.dumps({'error':'auth target not yet supported'})
+	return params['code']
+        # return json.dumps({'error':'auth target not yet supported'})
     @cherrypy.expose
     def logout(self, **params):
         cherrypy.session.delete()
