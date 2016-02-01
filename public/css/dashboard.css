@@ -141,6 +141,34 @@ a:hover {
   padding: 0px 0px 0px 40px;
 }
 
+.topDetailLink {
+  float: right;
+  color: #1D90FF;
+  cursor: pointer;
+}
+
+.accept-button {
+  border: 1px solid #ccc;
+  padding: 10px;
+  color: #fff;
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+  margin-top: 20px;
+  font-size: 16px;
+  border-radius: 8px;
+}
+
+.cancel-button {
+  border: 1px solid #ccc;
+  padding: 10px;
+  color: #fff;
+  background-color: #d9534f;
+  border-color: #d43f3a;
+  margin-top: 20px;
+  font-size: 16px;
+  border-radius: 8px;
+}
+
 .flexcenter {
   display: -webkit-flex;
   display: flex;

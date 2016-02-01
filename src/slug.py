@@ -86,7 +86,7 @@ def render(path, params, session):
         # format /pagename
         if path[0] in pages:
             return pages[path[0]](session, params)
-        initial_data = {"user":path[0]}
+        initial_data = {"user":path[0], "isOwnProfile":path[0]==session.get('user')}
         return cache.get('layout').render({
             'page_body':cache.getRaw('user'),
             'account_url': '/api/auth/logout',
