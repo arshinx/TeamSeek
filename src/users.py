@@ -37,7 +37,6 @@ class UserHandler(object):
     @cherrypy.expose
     def index(self, **params):
         """ Forward HTTP requests to the right handler """
-        cherrypy.session['user'] = 'gnihton'
         # Make sure that user is logged in
         if 'user' not in cherrypy.session:
             return json.dumps({"error": "You shouldn't be here"})
