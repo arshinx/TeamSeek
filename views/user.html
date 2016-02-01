@@ -38,7 +38,7 @@ textarea:disabled {
           <h2>
             {{user}}<a class="topDetailLink" v-on:click="editBio()" v-if="isOwnProfile && !editableBio">Edit</a>
           </h2>
-          <div id="bioEl">
+          <div id="bioEl" v-cloak>
             <textarea v-bind:class="{ 'bioEdit': editableBio }" :spellcheck="editableBio"
                       v-model="bio" :disabled="!editableBio">{{bio}}</textarea>
             <button v-if="editableBio" class="accept-button" v-on:click="saveBio()">Save</button>
@@ -76,6 +76,7 @@ textarea:disabled {
 </div>
 <script>
 var gravatar = 'http://www.gravatar.com/avatar/MD5_HASH?d=identicon';
+Vue.http.options.emulateJSON = true;
 function addGravatars(projectArray) {
     for (index in projectArray) {
       if (!projectArray[index].imageUrl) {
@@ -97,7 +98,8 @@ var projectdisplay = new Vue({
     var user_details = {action:'user_details', username:_onload_data.user};
     this.$http.get('/api/users', user_details).then(function (response) {
       console.log(response.data);
-      this.bio = response.data.bio;
+      this.bio = 'User "' + _onload_data.user + '" has not yet made a bio!';
+      if (response.data.bio) this.bio = response.data.bio;
     }, function (response) {
       // error callback
       this.showSpinner = false;
@@ -110,6 +112,12 @@ var projectdisplay = new Vue({
     },
     saveBio: function() {
       this.editableBio = false;
+      var edit_bio = {action:'edit_bio', data:this.bio};
+      this.$http.post('/api/users/', edit_bio).then(function (response) {
+
+      }, function(response) {
+        alert('There was an issue saving the bio');
+      });
     },
     cancelBio: function() {
       this.bio = this.oldBio;
@@ -120,7 +128,7 @@ var projectdisplay = new Vue({
     projects: [],
     myIdeas: [],
     editableBio: false,
-    bio: 'User "' + _onload_data.user + '" has not yet made a bio!',
+    bio: '',
     oldBio: null, /* save old bio in case the users discards changes */
     user: _onload_data.user,
     isOwnProfile: _onload_data.isOwnProfile,
