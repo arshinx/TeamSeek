@@ -8,6 +8,7 @@ import os
 from src import slug
 from src import api
 from src import db
+from src import login
 
 # Default port number
 PORT = 8080
@@ -40,7 +41,7 @@ class Router(object):
 
     # mount the targets from api.WebRoutes at /api/
     api = api.WebRoutes(db)
-
+    login = login.Login()
 
 """ Start application """
 cherrypy.quickstart(Router())
