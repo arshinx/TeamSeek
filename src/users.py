@@ -18,6 +18,7 @@ class UserHandler(object):
         'edit_last_name': ['user_extras', 'last_name'],
         'edit_bio': ['user_extras', 'bio'],
         'edit_avatar': ['user_extras', 'avatar'],
+        'edit_skill_level': ['user_skills', 'level'],
         # [PUT] Adding username and email into database (first use)
         'add_user': [],         # Add user into database (new users
         'add_skill': [],        # Add new skill into user's details
@@ -37,6 +38,7 @@ class UserHandler(object):
     @cherrypy.expose
     def index(self, **params):
         """ Forward HTTP requests to the right handler """
+        cherrypy.session['user'] = 'gnihton'
         # Make sure that user is logged in
         if 'user' not in cherrypy.session:
             return json.dumps({"error": "You shouldn't be here"})
@@ -86,7 +88,11 @@ class UserHandler(object):
         Editing a particular user's detail
 
         :param params:  See _ACTION at the top of this file for list of actions
-                        i.e {'action': 'edit_bio', 'data': 'something'}
+                        i.e. {'action': 'edit_first_name', 'data': 'something'}
+                        i.e. {'action': 'edit_last_name', 'data': 'something'}
+                        i.e. {'action': 'edit_bio', 'data': 'something'}
+                        i.e. {'action': 'edit_avatar', 'data': 'something'}
+                        i.e. {'action': 'edit_skill_level', 'data': 'Expert', 'skill': 'skill_name'}
         :return: {} if successful or {"error": "some error"} if failed
         """
         # Check if everything is provided
@@ -109,8 +115,15 @@ class UserHandler(object):
         query = "UPDATE %s " % table
         # Never put user's input in query. Only whatever we have pre-set
         query += "SET %s = %s " % (column, '%s')
-        query += "WHERE user_id = (SELECT user_id FROM users WHERE username = %s)"
-        self.cur.execute(query, (params['data'], cherrypy.session['user'], ))
+        query += "WHERE user_id = (SELECT user_id FROM users WHERE username = %s) "
+        # Forming parameters for query to pass into self.cur.execute()
+        query_params = (params['data'], cherrypy.session['user'], )
+        # If editing skill's level
+        if 'edit_skill_level' == params['action']:
+            query += "AND skill = %s"
+            query_params += (params['skill'], )
+        # Execute the query
+        self.cur.execute(query, query_params)
         # Apply changes to database
         self.db.connection.commit()
 
