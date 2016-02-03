@@ -15,7 +15,8 @@ CREATE TABLE user_extras (
 
 CREATE TABLE user_skills (
     user_id INT,
-    skill VARCHAR
+    skill VARCHAR,
+    level VARCHAR DEFAULT 'Beginner'
     );
 
 CREATE TABLE project_info (
