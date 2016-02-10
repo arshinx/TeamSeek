@@ -1,0 +1,6 @@
+*.swp
+.dbauth
+
+__pycache__/
+*.py[cod]
+*.swo

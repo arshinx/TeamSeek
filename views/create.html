@@ -1,0 +1,183 @@
+<style>
+textarea, .editarea div {
+  display: inline-block;
+  width: 100%;
+  height: 300px;
+  vertical-align: top;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 0 20px;
+}
+
+textarea {
+  border: 1px solid #ccc;
+  resize: none;
+  outline: none;
+  font-size: 14px;
+  font-family: 'Monaco', courier, monospace;
+  padding: 20px;
+}
+
+.markdown-display {
+  border: 1px solid #ccc;
+  background-color: #FAFAFA;
+  overflow: auto;
+}
+
+h2 a {
+  color: #1D90FF;
+}
+input[type="text"] {
+  font-size: 30px;
+  display: block;
+}
+button {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  color: #333;
+  padding: 10px;
+  margin-top: 20px;
+  border-radius: 8px;
+}
+#titleinput textarea {
+  background-color: white;
+  height: 100px;
+}
+</style>
+<div class="centerbox">
+  <div class="flexcenter">
+    <!-- Left panel -->
+    <div class="bigitem">
+      <div class="displayitem">
+        <div class="projectbox" id="projectbox">
+          <div id="editor">
+            <div class="editarea" v-if="projectName">
+              <h2>
+                <span v-on:click="clearName()">{{projectName}}</span>
+                <a href="https://help.github.com/articles/github-flavored-markdown/"
+                  target="_blank">(Format instructions here)</a>
+              </h2>
+              <textarea v-model="input" debounce="300"></textarea>
+              <h2>Preview</h2>
+              <div class="markdown-display" v-html="input | marked"></div>
+              <button class="accept-button" v-on:click="saveIdea()">Save</button>
+            </div>
+            <div id="titleinput" v-else>
+              <div v-if="project_id && showSpinner">
+                <h2>Loading project details...</h2>
+                <div class="spinnerBox" id="spinnerBox"></div>
+              </div>
+              <div v-else>
+                <h2>Project Name:</h2>
+                <input type="text" v-model="inputTitle"></input>
+                <h2>Short Description:</h2>
+                <textarea v-model="shorDesc" debounce="300"></textarea>
+                <button v-on:click="acceptName()">Continue</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="height:0px;">
+          <span class="footer">
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+            <a href="#">Terms of service</a>
+          </span>
+        </div>
+      </div>
+    </div>
+    <!-- Right panel -->
+    <div class="smallitem">
+      <div class="displayitem">
+        <h2>Notifications</h2>
+        <p><i>No new notifications</i></p>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script>
+<script>
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+var target = document.getElementById('spinnerBox');
+var spinner = new Spinner(LAYOUT_SPINNER_OPTS).spin(target);
+
+new Vue({
+  el: '#editor',
+  ready: function() {
+    if (getParameterByName('project_id')) {
+      /* If the project_id query string is set the user will be editing an existing project */
+      this.project_id = getParameterByName('project_id');
+      this.owner = getParameterByName('owner');
+      this.inputTitle = getParameterByName('title');
+      this.$http.get('/api/projects/', {action: 'project_details', user:this.owner, title:this.inputTitle}).then(function(response) {
+        /* Set previously defined attributes */
+        var data = response.data[0];
+        this.shorDesc = data.short_desc || '';
+        this.input = data.long_desc || '';
+        this.showSpinner = false;
+      },
+      function() {
+        alert('Unable to fetch project details');
+      });
+    }
+  },
+  methods: {
+    clearName: function() {
+      this.projectName = '';
+    },
+    acceptName: function() {
+      this.projectName = this.inputTitle;
+    },
+    saveFields: function(project_id, callback) {
+      /* Upload short_desc and long_desc */
+      var emulateJSON = {emulateJSON:true};
+      var short_desc = {action:'edit_short_desc', project_id:project_id, data:this.shorDesc};
+      this.$http.post('/api/projects/', short_desc, emulateJSON).then(function(response) {
+        var long_desc = {action:'edit_long_desc', project_id:project_id, data:this.input};
+        this.$http.post('/api/projects/', long_desc, emulateJSON).then(function(response) {
+          if (callback) callback();
+        }, function() {});
+      }, function() {});
+    },
+    saveIdea: function() {
+      /* Create/Edit the idea. Edit if project_id is defined in querystring.  */
+      var emulateJSON = {emulateJSON:true};
+      var new_project = {action:'new_project', title:this.projectName};
+      var projectPage = '/' + _onload_data.user + '/' + this.projectName;
+      if (this.project_id) {
+        /* Project has already been created and has a user_id */
+        this.saveFields(this.project_id, function() {
+          document.location = projectPage;
+        });
+      } else {
+        /* Project does not yet exist and needs to be created */
+        this.$http.post('/api/projects/', new_project, emulateJSON).then(function(response) {
+          this.saveFields(response.data.project_id, function() {
+            document.location = projectPage;
+          });
+        }, function() {
+          alert('There was a problem saving this project');
+        });
+      }
+    }
+  },
+  filters: {
+    marked: marked
+  },
+  data: {
+    input: '# hello',
+    inputTitle: '',
+    shorDesc: '',
+    projectName: '',
+    project_id: null,
+    showSpinner: true
+  }
+})
+</script>

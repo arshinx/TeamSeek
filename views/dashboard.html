@@ -1,0 +1,106 @@
+<style>
+#create-project {
+  float: right;
+  color: #1D90FF;
+}
+</style>
+<div class="centerbox">
+  <div class="flexcenter">
+    <!-- Left panel -->
+    <div class="bigitem">
+      <div class="displayitem" id="projectdisplay">
+        <h2>Projects<a href="/create" id="create-project">Publish New Idea</a></h2>
+        <div v-if="showSpinner" class="spinnerBox" id="spinnerBox"></div>
+        <div class="projectbox" v-for="project in projects" v-cloak>
+          <img align=left v-bind:src="project.imageUrl">
+          </img>
+          <h2><a href="/{{project.owner}}/{{project.title}}">{{project.owner}}/{{project.title}}</a></h2>
+          <p v-if="project.short_desc">{{project.short_desc}}</p>
+          <p v-else><i>No description found</i></p>
+        </div>
+        <p v-if="projects.length == 0 && ! showSpinner">No projects found<p>
+        <div style="height:0px;">
+          <span class="footer">
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+            <a href="#">Terms of service</a>
+          </span>
+        </div>
+      </div>
+    </div>
+    <!-- Right panel -->
+    <div class="smallitem" id="notifications">
+      <div class="displayitem">
+        <h2>Notifications</h2>
+        <p><i>Welcome back, {{init.user}}.</i></p>
+      </div>
+      <div class="displayitem">
+        <h2><a href="/{{init.user}}">My Ideas</a></h2>
+        <div v-if="showSpinner" class="spinnerBox" id="ideaSpinnerBox"></div>
+        <div v-for="idea in myIdeas" class="projectbox">
+          <img align=left width=40px height=40px v-bind:src="idea.imageUrl">
+          </img>
+          <p><a href="{{init.user}}/{{idea.title}}">{{idea.title}}</a></p>
+        </div>
+        <p v-if="myIdeas.length == 0 && ! showSpinner">None found<p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+Vue.config.debug = true;
+var gravatar = 'http://www.gravatar.com/avatar/MD5_HASH?d=identicon';
+function addGravatars(projectArray) {
+    for (index in projectArray) {
+      if (!projectArray[index].imageUrl) {
+        var hashSrc = projectArray[index].owner + '/' + projectArray[index].title;
+        var md5 = CryptoJS.MD5(hashSrc).toString();
+        projectArray[index].imageUrl = gravatar.replace('MD5_HASH',md5);
+      }
+    }
+}
+
+var notifications = new Vue({
+  el: '#notifications',
+  ready: function() {
+    var target = document.getElementById('ideaSpinnerBox')
+    var spinner = new Spinner(LAYOUT_SPINNER_OPTS).spin(target);
+    this.$http.get('/api/projects', {action: 'my_projects'}).then(function (response) {
+      console.log(response.data);
+      this.myIdeas = response.data;
+      addGravatars(this.myIdeas);
+      this.showSpinner = false;
+    }, function (response) {
+      // error callback
+      this.showSpinner = false;
+    });
+  },
+  data: {
+    init: _onload_data,
+    myIdeas: [],
+    showSpinner: true,
+    CryptoJS: CryptoJS
+  }
+});
+
+var projectdisplay = new Vue({
+  el: '#projectdisplay',
+  ready: function() {
+    var target = document.getElementById('spinnerBox')
+    var spinner = new Spinner(LAYOUT_SPINNER_OPTS).spin(target);
+    this.$http.get('/api/feed').then(function (response) {
+      this.projects = response.data;
+      addGravatars(this.projects);
+      this.showSpinner = false;
+    }, function (response) {
+      // error callback
+      this.showSpinner = false;
+    });
+  },
+  data: {
+    projects: [],
+    myIdeas: [],
+    showSpinner: true
+  }
+});
+</script>
