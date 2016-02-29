@@ -1,0 +1,308 @@
+
+<div id="centerbox" class="page-container">
+
+   <header class="featured-post has-tag-icon post-25884 post type-post status-publish format-standard hentry category-industry tag-getting-started tag-inspiration tag-resolutions"><section><div class="row">
+      <h1>
+         <!-- Avatar -->
+        <img class="avatar" v-on:click="editAvatar()"
+             v-bind:class="{'pointer': isOwnProfile, 'hover': isOwnProfile}" src="{{user_details.avatar}}" /><br>
+         <span class="name-display" v-if="!editableName">{{user_details.full_name}}</span>
+         <input class="edit-input" v-model="user_details.full_name" v-else
+             v-on:blur="saveName()" />
+         <span class="name-display">({{user}})</span>
+         <a class="edit-link" v-on:click="editName()" v-if="isOwnProfile && !editableName">Edit</a>
+      </h1>
+      <!-- Name ends -->
+
+      <br/>
+      <!-- Email, Join date begins -->
+      <b>Email: </b>
+      <input class="edit-input" v-model="user_details.email" v-if="editableEmail"
+             v-on:blur="saveEmail()" value="{{user_details.email}}"/>
+      <span class="email-display" v-else>{{user_details.email}}</span>
+      <span class="edit-link" v-on:click="editEmail()" v-if="isOwnProfile && !editableEmail">Edit</span>
+      <br />
+      <b>Join date: </b>
+      <span class="joindate">{{user_details.join_date}}</span>
+      <!-- Email & Join Date ends -->
+
+      <a href="" class="secondary large" id=" get-started">
+         <div id="bioEl" v-cloak>
+             <textarea v-if="editableBio" :spellcheck="editableBio" class="bio-edit"
+                  v-model="user_details.bio" :disabled="!editableBio">{{user_details.bio}}</textarea>
+                  <pre class="bio-display" v-else>{{user_details.bio}}</pre>
+                  <p class="edit-link" style="text-align: right;" v-on:click="editBio()" v-if="isOwnProfile && !editableBio">Edit</p>
+                  <button v-if="editableBio" class="accept-button" v-on:click="saveBio()">Save</button>
+                  <button v-if="editableBio" class="cancel-button" v-on:click="cancelBio()">Cancel</button>
+         </div>
+     </a>
+     <div id="bioEl" v-cloak>
+        <b>My Skills: </b>
+        <div class="skillbox">
+          <span v-for="skill in user_details.user_skills" v-on:click="changeLevel($index)"
+                class="skill {{skill.level}}"
+                v-bind:class="{'pointer': isOwnProfile, 'hover': isOwnProfile}">{{skill.name}}</span>
+        </div>
+        <i class="icon-plus-sign newskill" v-on:click="addSkill()" v-if="isOwnProfile"></i>
+      </div>
+   </div></section>
+   </header>
+
+   <!-- Sticky Submenu -->
+   <div class="sticky-subnav">
+     <div class="row">
+       <div class="twelve columns">
+         <ul class="sticky-subnav-list">
+           	<li class="cat-item cat-item-1311"><a>Projects from {{user}}</a>
+            </li>
+         </ul>
+       </div>
+     </div>
+   </div>
+   <!-- Sticky Submenu ends -->
+
+<!-- Add Skills Area -->
+   <section class="newsletter">
+     <div class="row">
+
+        <!-- Add Skills (Original Code by Nick/Team) -->
+        <div id="skillOverlay">
+          <div class="dim-page" v-on:click="cancel()" v-if="active"></div>
+          <div class="displayitem add-skill-box" v-if="active">
+            <h3>Add Skill</h3>
+            <input type="text" v-model="inputText" debounce="300" />
+            <ul class="skill-autocomplete">
+              <li v-for="suggestion in suggestions" v-on:click="addSkill($index)">{{suggestion}}</li>
+            </ul>
+            <button class="cancel-button" v-on:click="cancel()">Cancel</button>
+          </div>
+          <script>
+          var skillOverlay = new Vue({
+            el: '#skillOverlay',
+            watch: {
+              'inputText': function(data) {
+                if (!data) {
+                  this.suggestions = [];
+                  return;
+                }
+                this.$http.get('/api/skills/', {q: data}).then(function(response) {
+                  this.suggestions = response.data;
+                }, function (error) {
+                  alert(error);
+                });
+              }
+            },
+            methods: {
+              show: function(successHook) {
+                this.successHook = successHook;
+                this.inputText = '';
+                this.active = true;
+              },
+              cancel: function() {
+                this.active = false;
+              },
+              addSkill: function(skillIndex) {
+                var skill = this.suggestions[skillIndex].toLowerCase();
+                var addSkill = {action:'add_skill', skill:skill};
+                this.$http.put('/api/users/', addSkill).then(function (response) {
+                  if (this.successHook) this.successHook(skill);
+                  this.active = false;
+                },
+                function(response) {
+                  alert(response);
+                });
+              }
+            },
+            data: {
+              active: false,
+              inputText: '',
+              suggestions: []
+            }
+          });
+          </script>
+        </div>
+
+     </div>
+  </section>
+<!-- Add Skill Area Ends -->
+
+<!-- User Projects nicely formatted as cards -->
+<section class="page-content">
+  <div class="row flex-grid">
+     <div class="projectbox" v-for="project in projects" v-cloak>
+      <article class="excerpt">
+        <a href="#" class=" post type-post status-publish format-standard hentry category-learn tag-heroku tag-hosting-platform tag-tutorial">
+          <div class="featured-image has-tag-icon post-25802 post type-post status-publish format-standard hentry category-learn tag-heroku tag-hosting-platform tag-tutorial" ><img align=left v-bind:src="project.imageUrl"></img>
+          </div>
+          <div class="copy">
+            <p class="category">{{project.owner}}</p>
+            <h3><a href="/{{project.owner}}/{{project.title}}">{{project.title}}</a></h3>
+            <div class="excerpt">
+              <p>{{project.short_desc}}</p>
+            </div>
+            <p v-if="projects.length == 0">No projects found<p>
+          </div>
+        </a>
+      </article>
+   </div>
+<!-- User Projects End -->
+
+  </div>
+</section>
+
+<!-- Notifications Section -->
+<section class="newsletter">
+  <div class="row">
+    <div class="newsletter-embed">
+       <h2>Notifications</h2>
+       <p><i>No new notifications</i></p>
+    </div>
+  </div>
+</section>
+
+<!-- Page Container Ends -->
+</div>
+
+<!-- Scripts -->
+<script>
+var gravatar = 'http://www.gravatar.com/avatar/MD5_HASH?d=identicon';
+Vue.http.options.emulateJSON = true;
+function addGravatars(projectArray) {
+    for (index in projectArray) {
+      if (!projectArray[index].imageUrl) {
+        var hashSrc = projectArray[index].owner + '/' + projectArray[index].title;
+        var md5 = CryptoJS.MD5(hashSrc).toString();
+        projectArray[index].imageUrl = gravatar.replace('MD5_HASH',md5);
+      }
+    }
+}
+
+var projectdisplay = new Vue({
+  el: '#projectdisplay',
+  ready: function() {
+    this.$http.get('/api/projects', {action: 'my_projects', owner:_onload_data.user}).then(function (response) {
+      this.projects = response.data;
+      addGravatars(this.projects);
+      this.showSpinner = false;
+    });
+    var user_details = {action:'user_details', username:_onload_data.user};
+    this.$http.get('/api/users', user_details).then(function (response) {
+			this.user_details = response.data || {};
+      if (!response.data.full_name)
+        this.user_details.full_name = '';
+      if (!response.data.email)
+        this.user_details.email = 'None';
+      if (!response.data.bio)
+        this.user_details.bio = 'User "' + _onload_data.user + '" has not yet made a bio!';
+      if (!response.data.avatar)
+        this.user_details.avatar = 'http://www.gravatar.com/avatar/cabf11b4b39c76a47689a2db0f3458e9?d=identicon';
+    }, function (response) {
+      // error callback
+      this.showSpinner = false;
+    });
+  },
+  methods: {
+    editBio: function() {
+      this.oldBio = this.user_details.bio;
+      this.editableBio = true;
+    },
+    saveBio: function() {
+      this.editableBio = false;
+      var edit_bio = {action:'edit_bio', data:this.user_details.bio};
+      this.$http.post('/api/users/', edit_bio).then(function (response) {
+
+      }, function(response) {
+        alert('There was an issue saving the bio');
+      });
+    },
+    cancelBio: function() {
+      this.user_details.bio = this.oldBio;
+      this.editableBio = false;
+    },
+    /* enable input box for name */
+    editName: function() {
+      this.editableName = true;
+    },
+    /* saving name into database */
+    saveName: function() {
+      edit_full_name = {action: 'edit_full_name', data: this.user_details.full_name};
+      this.$http.post('/api/users/', edit_full_name).then(function (response) {
+       /* if saving is successful, do some commands here if necesssary */
+      },
+      /* if saving name failed */
+      function(response) {
+        alert("There's something wrong while saving name");
+      });
+      this.editableName = false;
+    },
+    /* enable input box for email */
+    editEmail: function() {
+      this.editableEmail = true;
+    },
+    /* saving email into database */
+    saveEmail: function() {
+      edit_email = {action: 'edit_email', data: this.user_details.email};
+      this.$http.post('/api/users/', edit_email).then(function (response) {
+        /* saving is successful, do something in here if necessary */
+      },
+      /* if saving failed somehow */
+      function(response) {
+        alert("There's something wrong while saving email");
+      });
+      this.editableEmail = false;
+    },
+    /* Changing skill level */
+    changeLevel: function(index) {
+      /* Edit skill_level at index location */
+      /* Check if it's the user's profile */
+      if (!this.isOwnProfile) return;
+      level_map = {"Beginner": "Intermediate", "Intermediate": "Expert", "Expert": "Beginner"};
+      this.user_details.user_skills[index].level = level_map[this.user_details.user_skills[index].level];
+      /* Update in database */
+      edit_skill_level = {"action": "edit_skill_level",
+                          "skill": this.user_details.user_skills[index].name,
+                          "data": this.user_details.user_skills[index].level};
+      this.$http.post('/api/users/', edit_skill_level).then(function (response) {
+        /* successful*/
+      },
+      function (response) {
+        alert(response);
+      });
+    },
+    addSkill: function() {
+      var that = this;
+      /* Render temporary skill tag when new skill is added serverside */
+      skillOverlay.show(function(skill) {
+        that.user_details.user_skills.push({name:skill, level:'Beginner'});
+      });
+    },
+    /* Changing avatar */
+    editAvatar: function() {
+      if (!this.isOwnProfile) return;
+      var URL = prompt("Please enter new avatar's URL: ");
+      if (!URL) return;
+      /* Update avatar in database */
+      edit_avatar = {"action": "edit_avatar", "data": URL};
+      this.$http.post('/api/users/', edit_avatar).then(function (response) {
+        /* Successful */
+        this.user_details.avatar = URL;
+      },
+      function(response) {
+        alert("There's something wrong while changing avatar");
+      });
+    }
+  },
+  data: {
+    projects: [],
+    myIdeas: [],
+    editableName: false,
+    editableEmail: false,
+    editableBio: false,
+		user_details: {},
+    oldBio: null, /* save old bio in case the users discards changes */
+    user: _onload_data.user,
+    isOwnProfile: _onload_data.isOwnProfile,
+    showSpinner: true
+  }
+});
+</script>
