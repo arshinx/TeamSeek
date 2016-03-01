@@ -6,12 +6,9 @@ import feed
 import suggestions
 import users
 import skills
-<<<<<<< HEAD
 import applications
 import notifications
 import invitations
-=======
->>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
 
 class WebRoutes(object):
     def __init__(self, db=None):
@@ -25,19 +22,11 @@ class WebRoutes(object):
             # require: cherrypy.session['user']
             self.feed = feed.ProjectFeeds(db)
 
-<<<<<<< HEAD
             # mount /api/suggestions/ page
             # require:
             #   cherrypy.session['user']
             #   project_id
             self.suggestions = suggestions.QualifiedUsers(db)
-=======
-            # mount /api/qualified_users/ page
-            # require:
-            #   cherrypy.session['user']
-            #   project_id
-            self.qualified_users = suggestions.QualifiedUsers(db)
->>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
 
             # mount /api/users/ page
             # require:
@@ -47,7 +36,6 @@ class WebRoutes(object):
             # mount /api/skills/ page
             self.skills = skills.SkillHandler(db)
 
-<<<<<<< HEAD
             # mount /api/applications/ page
             # require:
             #   Look into [GET]. [POST], [PUT], [DELETE] methods
@@ -66,12 +54,6 @@ class WebRoutes(object):
             # mount /api/auth/ page
             # maps /api/auth/github and /api/auth/debug
             self.auth = auth.WebRoutes(db)
-=======
-            # mount /api/auth/ page
-            # maps /api/auth/github and /api/auth/debug
-            self.auth = auth.WebRoutes()
-
->>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
         else:
             print "api.py >> Error: Invalid database connection"
 

@@ -7,7 +7,6 @@ import cherrypy
 import json
 import users
 
-<<<<<<< HEAD
 class QualifiedUsers(object):
     """ This class handles the page /api/qualified_users/ """
 
@@ -19,11 +18,6 @@ class QualifiedUsers(object):
     }
     def __init__(self, db=None):
         """ Initializing object """
-=======
-""" This class handles the page /api/qualified_users/ """
-class QualifiedUsers(object):
-    def __init__(self, db=None):
->>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
         if db:
             self.db = db
             self.cur = db.connection.cursor()
@@ -47,7 +41,6 @@ class QualifiedUsers(object):
         """
         Getting qualified users based on project_id
 
-<<<<<<< HEAD
         :param params: i.e. {'action': 'qualified_users', 'project_id': '1'}
         :return: all user details
         """
@@ -60,43 +53,22 @@ class QualifiedUsers(object):
         if params['action'] not in self._ACTION['_GET']:
             return json.dumps({'error': 'Action is not allowed'})
 
-=======
-        :param params: project_id
-        :return: all user details
-        """
-        # Check if project_id is provided
-        if 'project_id' not in params:
-            return json.dumps({"error": "Not enough data"})
-
->>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
         # Fetch the users that fit for this project
         # based on skills
         query = """
                 SELECT  users.user_id, username, email, join_date,
-<<<<<<< HEAD
                         (SELECT full_name FROM user_extras WHERE user_id = users.user_id),
                         (SELECT bio FROM user_extras WHERE user_id = users.user_id),
                         (SELECT avatar FROM user_extras WHERE user_id = users.user_id),
                         array(SELECT skill FROM user_skills WHERE user_skills.user_id = users.user_id),
                         array(SELECT level FROM user_skills WHERE user_skills.user_id = users.user_id)
-=======
-                        (SELECT first_name FROM user_extras WHERE user_id = users.user_id),
-                        (SELECT last_name FROM user_extras WHERE user_id = users.user_id),
-                        (SELECT bio FROM user_extras WHERE user_id = users.user_id),
-                        (SELECT avatar FROM user_extras WHERE user_id = users.user_id),
-                        array(SELECT skill FROM user_skills WHERE user_skills.user_id = users.user_id)
->>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
                 FROM users
                 WHERE users.user_id=ANY(SELECT user_skills.user_id
                                   FROM user_skills
                                   WHERE skill=ANY (SELECT skill
                                                    FROM project_skills
                                                    WHERE project_id = %s)
-<<<<<<< HEAD
                                   );
-=======
-                                  )
->>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
                 """
         self.cur.execute(query, (params['project_id'], ))
         # Fetching the data from database
@@ -105,11 +77,7 @@ class QualifiedUsers(object):
         if not fetch:
             return json.dumps([])
         # Grab all user_details returned from 'fetch'
-<<<<<<< HEAD
         user_details = users.format_user_details(full=True, fetch=fetch)
-=======
-        user_details = users.format_user_details(full=False, fetch=fetch)
->>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
         return json.dumps(user_details)
 
     """ POST request handler """

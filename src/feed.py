@@ -46,11 +46,7 @@ class ProjectFeeds(object):
                 FROM    project_info
                 WHERE   project_id = ANY (SELECT project_id FROM project_skills WHERE skill =ANY
                                             (SELECT skill FROM user_skills WHERE user_id =
-<<<<<<< HEAD
                                                 (SELECT user_id FROM users WHERE username = %s)));
-=======
-                                                (SELECT user_id FROM users WHERE username = %s)))
->>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
                 """
         self.cur.execute(query, (cherrypy.session['user'], ))
         fetch = self.cur.fetchall()
@@ -62,11 +58,7 @@ class ProjectFeeds(object):
                             (SELECT git_link FROM project_extras WHERE project_id=project_info.project_id),
                             array(SELECT skill FROM project_skills WHERE project_id=project_info.project_id),
                             array(SELECT member FROM project_members WHERE project_id=project_info.project_id)
-<<<<<<< HEAD
                     FROM    project_info;
-=======
-                    FROM    project_info
->>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
                     """
             self.cur.execute(query)
             fetch = self.cur.fetchall()
