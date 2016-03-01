@@ -1,6 +1,9 @@
 *.swp
 .dbauth
+<<<<<<< HEAD
 .githubAuth
+=======
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
 
 __pycache__/
 *.py[cod]

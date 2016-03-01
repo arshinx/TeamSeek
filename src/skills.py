@@ -57,7 +57,11 @@ class SkillHandler(object):
         """
         self.cur.execute(query, (params['q'] + "%",))          # Prevent SQL injection
         # Fetch the result returned by database
+<<<<<<< HEAD
         skills = [skill[0] for skill in self.cur.fetchall()]
+=======
+        skills = self.cur.fetchall()
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
         # Return the formatted of skills and used_counts
         return json.dumps(skills)
 
@@ -79,7 +83,11 @@ class SkillHandler(object):
             return json.dumps({"error": "Not enough data"})
 
         # Query for database
+<<<<<<< HEAD
         query = "UPDATE skills SET approved = %s WHERE name = %s;"
+=======
+        query = "UPDATE skills SET approved = %s WHERE name = %s"
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
         self.cur.execute(query, (params['approved'], params['skill'], ))
         # Apply changes to database
         self.db.connection.commit()

@@ -1,5 +1,6 @@
 import cherrypy
 import json
+<<<<<<< HEAD
 import requests
 import urlparse
 import os
@@ -31,6 +32,20 @@ class WebRoutes(object):
         # Store username in session
         cherrypy.session['user'] = result["login"]
         raise cherrypy.HTTPRedirect("/")
+=======
+import os
+
+ALLOW_DEBUG_LOGIN = 'DEBUG_LOGIN' in os.environ
+
+# Default to true until sprint 1 is finished
+# TODO, delete these lines
+ALLOW_DEBUG_LOGIN = True
+
+class WebRoutes(object):
+    @cherrypy.expose
+    def github(self, **params):
+        return json.dumps({'error':'auth target not yet supported'})
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
     @cherrypy.expose
     def logout(self, **params):
         cherrypy.session.delete()

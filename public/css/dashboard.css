@@ -23,6 +23,7 @@ a:hover {
   color:#1D90FF;
  }
 
+<<<<<<< HEAD
 .dim-page {
   position: fixed;
   top: 0px;
@@ -33,6 +34,8 @@ a:hover {
   opacity: 0.2;
 }
 
+=======
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
 .projectbox {
   display: block;
   color: black;

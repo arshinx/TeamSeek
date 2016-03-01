@@ -12,6 +12,7 @@ class UserHandler(object):
     # Format: {'action': [table, column(s)]}
     _ACTION = {
         # [GET] Getting user's details
+<<<<<<< HEAD
         '_GET': {
             'user_details': []     # To get user's full details
         },
@@ -35,6 +36,20 @@ class UserHandler(object):
         '_DELETE': {
             'delete_skill': ['user_skills', 'skill']      # delete user's old skill from database
         }
+=======
+        'user_details': [],     # To get user's full details
+        # [POST] Editing user's details
+        'edit_first_name': ['user_extras', 'first_name'],
+        'edit_last_name': ['user_extras', 'last_name'],
+        'edit_bio': ['user_extras', 'bio'],
+        'edit_avatar': ['user_extras', 'avatar'],
+        'edit_skill_level': ['user_skills', 'level'],
+        # [PUT] Adding username and email into database (first use)
+        'add_user': [],         # Add user into database (new users
+        'add_skill': [],        # Add new skill into user's details
+        # [DELETE] Removing user's details
+        'delete_skill': ['user_skills', 'skill']      # delete user's old skill from database
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
     }
 
     def __init__(self, db=None):
@@ -69,6 +84,7 @@ class UserHandler(object):
            'username' not in params:
                 return json.dumps({"error": "Not enough data"})
 
+<<<<<<< HEAD
         # Check if action is allowed
         if params['action'] not in self._ACTION['_GET']:
             return json.dumps({'error': 'Action is not allowed'})
@@ -83,6 +99,18 @@ class UserHandler(object):
                         array(SELECT level FROM user_skills WHERE user_skills.user_id = users.user_id)
                 FROM users
                 WHERE username = %s;
+=======
+        # Fetch the user that has 'username'
+        query = """
+                SELECT  users.user_id, username, email, join_date,
+                        (SELECT first_name FROM user_extras WHERE user_id = users.user_id),
+                        (SELECT last_name FROM user_extras WHERE user_id = users.user_id),
+                        (SELECT bio FROM user_extras WHERE user_id = users.user_id),
+                        (SELECT avatar FROM user_extras WHERE user_id = users.user_id),
+                        array(SELECT skill FROM user_skills WHERE user_skills.user_id = users.user_id)
+                FROM users
+                WHERE username = %s
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
                 """
         self.cur.execute(query, (params['username'], ))
         # Fetching the data from database
@@ -102,6 +130,7 @@ class UserHandler(object):
         Editing a particular user's detail
 
         :param params:  See _ACTION at the top of this file for list of actions
+<<<<<<< HEAD
                         i.e. {'action': 'edit_email', 'data': 'example@example.com'}
                         i.e. {'action': 'edit_full_name', 'data': 'Full Name'}
                         i.e. {'action': 'edit_bio', 'data': 'something'}
@@ -110,6 +139,13 @@ class UserHandler(object):
                         i.e. {'action': 'edit_cur_city', 'data': 'city'}
                         i.e. {'action': 'edit_cur_state', 'data': 'state'}
                         i.e. {'action': 'edit_cur_country', 'data': 'country'}
+=======
+                        i.e. {'action': 'edit_first_name', 'data': 'something'}
+                        i.e. {'action': 'edit_last_name', 'data': 'something'}
+                        i.e. {'action': 'edit_bio', 'data': 'something'}
+                        i.e. {'action': 'edit_avatar', 'data': 'something'}
+                        i.e. {'action': 'edit_skill_level', 'data': 'Expert', 'skill': 'skill_name'}
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
         :return: {} if successful or {"error": "some error"} if failed
         """
         # Check if everything is provided
@@ -117,6 +153,7 @@ class UserHandler(object):
            'data' not in params:
             return json.dumps({"error": "Not enough data"})
 
+<<<<<<< HEAD
         # Check if action is allowed
         if params['action'] not in self._ACTION['_POST']:
             return json.dumps({'error': 'Action is not allowed'})
@@ -131,16 +168,41 @@ class UserHandler(object):
 
         # Apply edit
         query = "UPDATE {0} SET {1} = %s WHERE user_id = (SELECT user_id FROM users WHERE username = %s) "
+=======
+        # Check if action is in _ACTION list
+        # Need to take a look at this
+        # It might cause some unexpected errors if
+        # the action is for [GET], [PUT] or [DELETE]
+        if params['action'] not in self._ACTION:
+            return json.dumps({"error": "Action is unavailable"})
+
+        # Getting everything we need
+        table = self._ACTION[params['action']][0]
+        column = self._ACTION[params['action']][1]
+
+        # Apply edit
+        query = "UPDATE %s " % table
+        # Never put user's input in query. Only whatever we have pre-set
+        query += "SET %s = %s " % (column, '%s')
+        query += "WHERE user_id = (SELECT user_id FROM users WHERE username = %s) "
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
         # Forming parameters for query to pass into self.cur.execute()
         query_params = (params['data'], cherrypy.session['user'], )
         # If editing skill's level
         if 'edit_skill_level' == params['action']:
+<<<<<<< HEAD
             query += "AND skill = %s;"
             query_params += (params['skill'], )
         else:
             query += ";"
         # Execute the query
         self.cur.execute(query.format(table, column), query_params)
+=======
+            query += "AND skill = %s"
+            query_params += (params['skill'], )
+        # Execute the query
+        self.cur.execute(query, query_params)
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
         # Apply changes to database
         self.db.connection.commit()
 
@@ -162,10 +224,13 @@ class UserHandler(object):
            ('skill' not in params):
                 return json.dumps({"error": "Not enough data"})
 
+<<<<<<< HEAD
         # Check if action is allowed
         if params['action'] not in self._ACTION['_PUT']:
             return json.dumps({'error': 'Action is not allowed'})
 
+=======
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
         # If it's adding user
         if params['action'] == 'add_user':
             # msg will be json formatted
@@ -196,16 +261,26 @@ class UserHandler(object):
             return json.dumps({"error": "Not enough data"})
 
         # Check if the action is in _ACTION
+<<<<<<< HEAD
         if params['action'] not in self._ACTION['_DELETE']:
             return json.dumps({"error": "Action is not allowed"})
 
         # Prepare everything we need
         table = self._ACTION['_DELETE'][params['action']][0]
         column = self._ACTION['_DELETE'][params['action']][1]
+=======
+        if params['action'] not in self._ACTION:
+            return json.dumps({"error": "Action is unavailable"})
+
+        # Prepare everything we need
+        table = self._ACTION[params['action']][0]
+        column = self._ACTION[params['action']][1]
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
 
         # Form query to find and delete the skill based on the logged in user
         # DO NOT pass any user's input into query
         # SQL injection!
+<<<<<<< HEAD
         query = """
                 DELETE FROM {0}  
                 WHERE user_id = (SELECT user_id FROM users WHERE username = %s)
@@ -216,6 +291,15 @@ class UserHandler(object):
 
         # Send query to database
         self.cur.execute(query.format(table, column), (cherrypy.session['user'], params['skill'], params['skill']))
+=======
+        query = "DELETE FROM %s " % table
+        query += "WHERE user_id = (SELECT user_id FROM users WHERE username = %s) "
+        query += "AND %s = %s;" % (column, '%s')
+        query += "UPDATE skills SET count = count - 1 WHERE name = %s;"
+
+        # Send query to database
+        self.cur.execute(query, (cherrypy.session['user'], params['skill'], params['skill']))
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
 
         # Apply changes to database
         self.db.connection.commit()
@@ -242,6 +326,7 @@ def format_user_details(full=False, fetch=None):
         # When not getting full details
         dict['user_id'] = user[0]
         dict['username'] = user[1]
+<<<<<<< HEAD
         dict['full_name'] = user[4]
         dict['avatar'] = user[6]
         # Format skill into a list of dictionaries
@@ -255,12 +340,24 @@ def format_user_details(full=False, fetch=None):
             dict['email'] = user[2]
             dict['join_date'] = user[3].strftime('%m-%d-%Y')
             dict['bio'] = user[5]
+=======
+        dict['first_name'] = user[4]
+        dict['last_name'] = user[5]
+        dict['avatar'] = user[7]
+        dict['user_skills'] = user[8]
+        # When full=True
+        if full:
+            dict['email'] = user[2]
+            dict['join_date'] = user[3]
+            dict['bio'] = user[6]
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
         # Appending the dictionary into user_details list
         user_details.append(dict)
     return user_details
 
 """ Add user """
 def add_new_user(cur=None, username=None, email=None):
+<<<<<<< HEAD
     # Put username and email into our database
     # if the username isn't existed yet
     # also create a row for in user_extras and user_locs
@@ -286,6 +383,24 @@ def add_new_user(cur=None, username=None, email=None):
             $$
             """
     cur.execute(query, (username, email, date.today(), ))
+=======
+    # Check if user's in database
+    query = "SELECT * FROM users WHERE username = %s"
+    cur.execute(query, (username, ))
+    # If there are data returned
+    if cur.fetchall():
+        return json.dumps({"error": "User is already in database"})
+
+    # Put username and email into our database
+    # Also create a new column for user_extras
+    query = """
+            INSERT INTO users (username, email, join_date)
+            VALUES (%s, %s, %s);
+            INSERT INTO user_extras (user_id)
+            VALUES ((SELECT user_id FROM users WHERE username = %s));
+            """
+    cur.execute(query, (username, email, date.today(), username, ))
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
     # Successfully added new user
     return json.dumps({})
 
@@ -295,7 +410,11 @@ def add_user_skill(cur=None, user=None, skill=None):
     query = """
             SELECT * FROM user_skills
             WHERE user_id = (SELECT user_id FROM users WHERE username = %s)
+<<<<<<< HEAD
             AND skill = %s;
+=======
+            AND skill = %s
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
             """
     cur.execute(query, (user, skill, ))
     if cur.fetchall():

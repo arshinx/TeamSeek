@@ -3,6 +3,7 @@
   float: right;
   color: #1D90FF;
 }
+<<<<<<< HEAD
 .notification-count {
   color: white;
   font-size: 20px;
@@ -78,6 +79,8 @@
   background-image: linear-gradient(to bottom, #fc2a2a, #bf0000);
   cursor: pointer;
 }
+=======
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
 </style>
 <div class="centerbox">
   <div class="flexcenter">
@@ -104,6 +107,7 @@
       </div>
     </div>
     <!-- Right panel -->
+<<<<<<< HEAD
     <div class="smallitem">
       <div v-cloak id="notifications">
         <div v-if="!noInvitations || !noApplications" class="displayitem">
@@ -157,6 +161,14 @@
         </div>
       </div>
       <div id="myideas" class="displayitem">
+=======
+    <div class="smallitem" id="notifications">
+      <div class="displayitem">
+        <h2>Notifications</h2>
+        <p><i>Welcome back, {{init.user}}.</i></p>
+      </div>
+      <div class="displayitem">
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
         <h2><a href="/{{init.user}}">My Ideas</a></h2>
         <div v-if="showSpinner" class="spinnerBox" id="ideaSpinnerBox"></div>
         <div v-for="idea in myIdeas" class="projectbox">
@@ -170,8 +182,11 @@
   </div>
 </div>
 <script>
+<<<<<<< HEAD
 Vue.http.options.emulateJSON = true;
 
+=======
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
 Vue.config.debug = true;
 var gravatar = 'http://www.gravatar.com/avatar/MD5_HASH?d=identicon';
 function addGravatars(projectArray) {
@@ -187,6 +202,7 @@ function addGravatars(projectArray) {
 var notifications = new Vue({
   el: '#notifications',
   ready: function() {
+<<<<<<< HEAD
     request = {'action': 'my_notifications', 'type': 'invitation'};
     this.$http.get('/api/notifications/', request).then(function (response) {
       // If doesn't get anything back
@@ -310,6 +326,12 @@ var myideas = new Vue({
     var target = document.getElementById('ideaSpinnerBox')
     var spinner = new Spinner(LAYOUT_SPINNER_OPTS).spin(target);
     this.$http.get('/api/projects', {action: 'my_projects'}).then(function (response) {
+=======
+    var target = document.getElementById('ideaSpinnerBox')
+    var spinner = new Spinner(LAYOUT_SPINNER_OPTS).spin(target);
+    this.$http.get('/api/projects', {action: 'my_projects'}).then(function (response) {
+      console.log(response.data);
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
       this.myIdeas = response.data;
       addGravatars(this.myIdeas);
       this.showSpinner = false;

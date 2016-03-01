@@ -5,7 +5,10 @@ import cherrypy
 import json
 import os
 
+<<<<<<< HEAD
 from src import create
+=======
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
 from src import slug
 from src import api
 from src import db
@@ -39,9 +42,12 @@ class Router(object):
     def default(self, *path, **params):
         return slug.render(path, params, cherrypy.session)
 
+<<<<<<< HEAD
     # map /create/ target
     create = create.WebRoutes()
 
+=======
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
     # mount the targets from api.WebRoutes at /api/
     api = api.WebRoutes(db)
 

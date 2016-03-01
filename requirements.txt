@@ -1,4 +1,7 @@
 CherryPy>=4.0.0
 psycopg2>=2.6.1
 pystache>=0.5.4
+<<<<<<< HEAD
 requests>=2.9.1
+=======
+>>>>>>> e61e3f96fa4806d64ae29578ead33a27eb210b18
